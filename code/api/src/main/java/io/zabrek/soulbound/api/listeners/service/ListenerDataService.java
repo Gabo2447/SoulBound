@@ -2,6 +2,7 @@ package io.zabrek.soulbound.api.listeners.service;
 
 import io.zabrek.soulbound.api.data.CooldownRecord;
 import io.zabrek.soulbound.api.data.LevelRecord;
+import io.zabrek.soulbound.api.data.Skills;
 import io.zabrek.soulbound.api.profile.Profile;
 
 import java.util.List;
@@ -41,6 +42,24 @@ public interface ListenerDataService {
     List<LevelRecord> getLevels(Profile profile);
 
     /**
+     * Gets the language for this profile.
+     *
+     * @param profile the profile to get the data
+     * @return language
+     * @since 2.0.0
+     */
+    String getLanguage(Profile profile);
+
+    /**
+     * Gets the active skill for this profile.
+     *
+     * @param profile the profile to get the skill
+     * @return skill id
+     * @since 2.0.0
+     */
+    Skills getActiveSkill(Profile profile);
+
+    /**
      * Updates ALL data.
      *
      * @param profile   the profile to update
@@ -60,7 +79,7 @@ public interface ListenerDataService {
     /**
      * Updates the list of level data.
      *
-     * @param profile the profile to update
+     * @param profile   the profile to update
      * @param freshData the new data
      */
     void updateLevel(Profile profile, List<LevelRecord> freshData);
@@ -77,10 +96,26 @@ public interface ListenerDataService {
     /**
      * Updates the list of cooldowns data.
      *
-     * @param profile the profile to update
+     * @param profile   the profile to update
      * @param freshData the new data
      */
     void updateCooldown(Profile profile, List<CooldownRecord> freshData);
+
+    /**
+     * Updates the language.
+     *
+     * @param profile  the profile to update
+     * @param language the new language
+     */
+    void updateLanguage(Profile profile, String language);
+
+    /**
+     * Updates the active skill.
+     *
+     * @param profile the profile to update
+     * @param skillID the new skill active
+     */
+    void updateActiveSkill(Profile profile, Skills skillID);
 
     /**
      * Deletes all data.
@@ -107,22 +142,4 @@ public interface ListenerDataService {
      * @since 2.0.0
      */
     void removeCooldown(Profile profile, List<CooldownRecord> removeData);
-
-    /**
-     * Deletes a level from the database.
-     *
-     * @param profile    the profile to remove the level
-     * @param removeData the level to remove
-     * @since 2.0.0
-     */
-    void removeLevel(Profile profile, LevelRecord removeData);
-
-    /**
-     * Deletes a list of levels from the database.
-     *
-     * @param profile    the profile to remove the levels
-     * @param removeData the levels to remove
-     * @since 2.0.0
-     */
-    void removeLevel(Profile profile, List<LevelRecord> removeData);
 }

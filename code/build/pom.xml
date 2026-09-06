@@ -11,6 +11,7 @@
   </parent>
 
   <name>SoulBound Build</name>
+  <groupId>io.zabrek</groupId>
   <artifactId>soulbound</artifactId>
   <version>${revision}${changelist}</version>
   <description>Your best statistics Plugin</description>
