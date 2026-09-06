@@ -7,94 +7,132 @@ import java.util.function.Function;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public enum UpdateType {
+
+    // --- INSERT OPERATIONS ---
     /**
-     * Add the single trigger. ProfileID, triggerID, instruction.
+     * Inserts a new trigger. Params: ProfileID, trigger, instructions.
      */
-    ADD_TRIGGERS(prefix -> "INSERT INTO " + prefix + "triggers (profileID, trigger, instructions) VALUES (?, ?, ?);"),
+    ADD_TRIGGERS(prefix -> "INSERT INTO " + prefix + "triggers (profileID, triggers, instructions) VALUES (?, ?, ?);"),
+
     /**
-     * Add single player profile. PlayerID, profileID, name.
+     * Inserts a new player profile. Params: PlayerID, profileID, name.
      */
-    ADD_PLAYER_PROFILE(prefix -> "INSERT INTO " + prefix + "player_profile (playerID, profileID, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name);"),
+    ADD_PLAYER_PROFILE(prefix -> "INSERT INTO " + prefix + "player_profile (playerID, profileID, name) VALUES (?, ?, ?);"),
+
     /**
-     * Add single profile. ProfileID.
+     * Inserts a new profile. Params: ProfileID.
      */
-    ADD_PROFILE(prefix -> "INSERT INTO " + prefix + "profile (profileID) VALUES (?) ON DUPLICATE KEY UPDATE profileID = profileID;"),
+    ADD_PROFILE(prefix -> "INSERT INTO " + prefix + "profile (profileID) VALUES (?);"),
+
     /**
-     * Add single cooldown. ProfileID, skill, time.
+     * Inserts a new cooldown. Params: ProfileID, skill, time.
      */
     ADD_COOLDOWN(prefix -> "INSERT INTO " + prefix + "cooldown (profileID, skill, time) VALUES (?, ?, ?);"),
-    /**
-     * Add a single level. ProfileID, skill, level, experience.
-     */
-    ADD_LEVEL(prefix -> "INSERT INTO " + prefix + "level (profileID, skill, level, experience) VALUES(?, ?, ?, ?);"),
-    /**
-     * Add single player. PlayerID, active_profile, language.
-     */
-    ADD_PLAYER(prefix -> "INSERT INTO " + prefix + "player (playerID, active_profile, language) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE active_profile = VALUES(active_profile), language = VALUES(language);"),
 
     /**
-     * Removes the single trigger. ProfileID, triggerID.
+     * Inserts a new level record. Params: ProfileID, skill, level, experience.
      */
-    REMOVE_TRIGGERS(prefix -> "DELETE FROM " + prefix + "triggers WHERE profileID = ? AND trigger = ?;"),
-    /**
-     * Remove single player profile. ProfileID.
-     */
-    REMOVE_PLAYER_PROFILE(prefix -> "DELETE FROM " + prefix + "player_profile WHERE profileID = ?;"),
-    /**
-     * Remove single profile. ProfileID.
-     */
-    REMOVE_PROFILE(prefix -> "DELETE FROM " + prefix + "profile WHERE profileID = ?;"),
-    /**
-     * Remove single cooldown. ProfileID, skill.
-     */
-    REMOVE_COOLDOWN(prefix -> "DELETE FROM " + prefix + "cooldown WHERE profileID = ? AND skill = ?;"),
-    /**
-     * Remove single level. ProfileID, skill.
-     */
-    REMOVE_LEVEL(prefix -> "DELETE FROM " + prefix + "level WHERE profileID = ? AND skill = ?;"),
+    ADD_LEVEL(prefix -> "INSERT INTO " + prefix + "level (profileID, skill, level, experience) VALUES (?, ?, ?, ?);"),
 
     /**
-     * Deletes all triggers for a given profile. ProfileID.
+     * Inserts a new player. Params: PlayerID, active_profile, language, skill_active.
      */
-    DELETE_TRIGGERS(prefix -> "DELETE FROM " + prefix + "triggers WHERE profileID = ?;"),
+    ADD_PLAYER(prefix -> "INSERT INTO " + prefix + "player (playerID, active_profile, language, skill_active) VALUES (?, ?, ?, ?);"),
+
+    // --- REMOVE / DELETE OPERATIONS ---
+
     /**
-     * Deletes all cooldown for a give profile. ProfileID.
+     * Removes a specific trigger. Params: ProfileID, triggerID.
      */
-    DELETE_COOLDOWN(prefix -> "DELETE FROM " + prefix + "cooldown WHERE profileID = ?;"),
+    DELETE_TRIGGERS(prefix -> "DELETE FROM " + prefix + "triggers WHERE profileID = ? AND triggers = ?;"),
+
     /**
-     * Deletes all level for a give profile. ProfileID.
+     * Removes a specific player profile association. Params: PlayerID, ProfileID.
      */
-    DELETE_LEVEL(prefix -> "DELETE FROM " + prefix + "level WHERE profileID = ?;"),
+    DELETE_PLAYER_PROFILE(prefix -> "DELETE FROM " + prefix + "player_profile WHERE playerID = ? AND profileID = ?;"),
+
     /**
-     * Deletes the player. PlayerID.
+     * Removes a profile. Params: ProfileID.
+     */
+    DELETE_PROFILE(prefix -> "DELETE FROM " + prefix + "profile WHERE profileID = ?;"),
+
+    /**
+     * Removes a specific cooldown. Params: ProfileID, skill.
+     */
+    DELETE_COOLDOWN(prefix -> "DELETE FROM " + prefix + "cooldown WHERE profileID = ? AND skill = ?;"),
+
+    /**
+     * Removes a specific skill level. Params: ProfileID, skill.
+     */
+    DELETE_LEVEL(prefix -> "DELETE FROM " + prefix + "level WHERE profileID = ? AND skill = ?;"),
+
+    /**
+     * Deletes all triggers for a profile. Params: ProfileID.
+     */
+    DELETE_ALL_TRIGGERS(prefix -> "DELETE FROM " + prefix + "triggers WHERE profileID = ?;"),
+
+    /**
+     * Deletes all cooldowns for a profile. Params: ProfileID.
+     */
+    DELETE_ALL_COOLDOWNS(prefix -> "DELETE FROM " + prefix + "cooldown WHERE profileID = ?;"),
+
+    /**
+     * Deletes all levels for a profile. Params: ProfileID.
+     */
+    DELETE_ALL_LEVELS(prefix -> "DELETE FROM " + prefix + "level WHERE profileID = ?;"),
+
+    /**
+     * Deletes a player entirely. Params: PlayerID.
      */
     DELETE_PLAYER(prefix -> "DELETE FROM " + prefix + "player WHERE playerID = ?;"),
 
     /**
-     * Updates the profileID of all triggers for a given profile. ProfileID, ProfileID.
+     * Removes a specific trigger definition globally. Params: Trigger name.
      */
-    UPDATE_PLAYERS_TRIGGERS(prefix -> "UPDATE " + prefix + "triggers SET profileID = ? WHERE profileID = ?;"),
+    DELETE_GLOBAL_TRIGGER(prefix -> "DELETE FROM " + prefix + "triggers WHERE triggers = ?;"),
+
+    // --- UPDATE OPERATIONS ---
+
     /**
-     * Updates the profileID's name for a given profile. Name, ProfileID.
+     * Reassigns all triggers from one profile to another. Params: New ProfileID, Old ProfileID.
      */
-    UPDATE_PROFILE_NAME(prefix -> "UPDATE " + prefix + "player_profile SET name = ? WHERE profileID = ?;"),
+    UPDATE_TRIGGERS_PROFILE(prefix -> "UPDATE " + prefix + "triggers SET profileID = ? WHERE profileID = ?;"),
+
     /**
-     * Updates the player's level for a given profile. Level, ProfileID, Skill.
+     * Updates a profile name for a specific player. Params: Name, PlayerID, ProfileID.
      */
-    UPDATE_PLAYERS_LEVEL(prefix -> "UPDATE " + prefix + "level SET level = ? WHERE profileID = ? AND skill = ?;"),
+    UPDATE_PROFILE_NAME(prefix -> "UPDATE " + prefix + "player_profile SET name = ? WHERE playerID = ? AND profileID = ?;"),
+
     /**
-     * Updates the player's cooldown for a given profile and skill. Time, ProfileID, Skill.
+     * Updates player level for a skill. Params: Level, Experience, ProfileID, Skill.
      */
-    UPDATE_PLAYERS_COOLDOWN(prefix -> "UPDATE " + prefix + "cooldown SET time = ? WHERE profileID = ? AND skill = ?;"),
+    UPDATE_PLAYER_LEVEL(prefix -> "UPDATE " + prefix + "level SET level = ?, experience = ? WHERE profileID = ? AND skill = ?;"),
+
     /**
-     * Updates the profileID's language for a given profile. Language, ProfileID.
+     * Updates cooldown timestamp for a skill. Params: Time, ProfileID, Skill.
+     */
+    UPDATE_PLAYER_COOLDOWN(prefix -> "UPDATE " + prefix + "cooldown SET time = ? WHERE profileID = ? AND skill = ?;"),
+
+    /**
+     * Updates player language setting. Params: Language, PlayerID.
      */
     UPDATE_PLAYER_LANGUAGE(prefix -> "UPDATE " + prefix + "player SET language = ? WHERE playerID = ?;"),
 
     /**
+     * Updates player active skill. Params: Active Skill, PlayerID.
+     */
+    UPDATE_PLAYER_SKILL(prefix -> "UPDATE " + prefix + "player SET skill_active = ? WHERE playerID = ?;"),
+
+    /**
+     * Renames a trigger identifier across all profiles. Params: New Trigger Name, Old Trigger Name.
+     */
+    RENAME_TRIGGER_GLOBAL(prefix -> "UPDATE " + prefix + "triggers SET triggers = ? WHERE triggers = ?;"),
+
+    // --- DDL DROP OPERATIONS ---
+    /**
      * Drops the triggers table.
      */
-    DROP_TRIGGERS(prefix -> "DROP TABLE " + prefix + "triggers"),
+    DROP_TRIGGERS(prefix -> "DROP TABLE " + prefix + "triggers;"),
     /**
      * Drops the player profile table.
      */
@@ -106,7 +144,7 @@ public enum UpdateType {
     /**
      * Drops the player table.
      */
-    DROP_PLAYER(prefix -> "DROP TABLE " + prefix + "player"),
+    DROP_PLAYER(prefix -> "DROP TABLE " + prefix + "player;"),
     /**
      * Drops the cooldown table.
      */
@@ -118,42 +156,7 @@ public enum UpdateType {
     /**
      * Drops the migration table.
      */
-    DROP_MIGRATION(prefix -> "DROP TABLE " + prefix + "migration"),
-
-    /**
-     * Inserts a new trigger. ProfileID, trigger, instructions.
-     */
-    INSERT_TRIGGER(prefix -> "INSERT INTO " + prefix + "triggers (profileID, trigger, instructions) VALUES (?, ?, ?);"),
-    /**
-     * Inserts a new player. PlayerID, active_profile, language.
-     */
-    INSERT_PLAYER(prefix -> "INSERT INTO " + prefix + "player (playerID, active_profile, language) VALUES (?,?,?) ON DUPLICATE KEY UPDATE active_profile = VALUES(active_profile), language = VALUES(language);"),
-    /**
-     * Inserts a new profile. ProfileID.
-     */
-    INSERT_PROFILE(prefix -> "INSERT INTO " + prefix + "profile (profileID) VALUES (?) ON DUPLICATE KEY UPDATE profileID = profileID;"),
-    /**
-     * Inserts a new player profile. PlayerID, profileID, name.
-     */
-    INSERT_PLAYER_PROFILE(prefix -> "INSERT INTO " + prefix + "player_profile (playerID, profileID, name) VALUES (?,?,?) ON DUPLICATE KEY UPDATE name = VALUES(name);"),
-    /**
-     * Inserts a new cooldown. ProfileID, skill, time.
-     */
-    INSERT_COOLDOWN(prefix -> "INSERT INTO " + prefix + "cooldown (profileID, skill, time) VALUES (?, ?, ?);"),
-    /**
-     * Inserts a new level. ProfileID, skill, level, experience.
-     */
-    INSERT_LEVEL(prefix -> "INSERT INTO " + prefix + "level (profileID, skill, level, experience) VALUES(?, ?, ?, ?);"),
-
-    /**
-     * Remove all triggers for a given trigger. Trigger.
-     */
-    REMOVE_ALL_TRIGGERS(prefix -> "DELETE FROM " + prefix + "triggers WHERE trigger = ?;"),
-
-    /**
-     * Renames all triggers for a given trigger. Trigger, Trigger.
-     */
-    RENAME_ALL_TRIGGERS(prefix -> "UPDATE " + prefix + "triggers SET trigger = ? WHERE trigger = ?");
+    DROP_MIGRATION(prefix -> "DROP TABLE " + prefix + "migration;");
 
     /**
      * Function to create the SQL code from a prefix.

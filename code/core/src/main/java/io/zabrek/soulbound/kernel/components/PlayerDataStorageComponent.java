@@ -6,7 +6,6 @@ import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.api.profile.ProfileProvider;
 import io.zabrek.soulbound.api.reload.ReloadPhase;
 import io.zabrek.soulbound.api.reload.Reloader;
-import io.zabrek.soulbound.api.service.identifier.Identifiers;
 import io.zabrek.soulbound.data.PlayerDataStorage;
 import io.zabrek.soulbound.database.Connector;
 import io.zabrek.soulbound.database.Saver;
@@ -29,7 +28,7 @@ public class PlayerDataStorageComponent implements CoreComponent {
     @Override
     public Set<Class<?>> requires() {
         return Set.of(SoulBoundLoggerFactory.class, ConfigAccessor.class, Saver.class, Connector.class,
-                Identifiers.class, ProfileProvider.class, Reloader.class);
+                ProfileProvider.class, Reloader.class);
     }
 
     @Override
@@ -40,14 +39,13 @@ public class PlayerDataStorageComponent implements CoreComponent {
     @Override
     public void load(final DependencyProvider provider) {
         final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
-        final Identifiers identifiers = provider.get(Identifiers.class);
         final Saver saver = provider.get(Saver.class);
         final Connector connector = provider.get(Connector.class);
         final ProfileProvider profileProvider = provider.get(ProfileProvider.class);
         final ConfigAccessor config = provider.get(ConfigAccessor.class);
         final Reloader reloader = provider.get(Reloader.class);
 
-        final PlayerDataFactory playerDataFactory = new PlayerDataFactory(loggerFactory, saver, connector, identifiers, config);
+        final PlayerDataFactory playerDataFactory = new PlayerDataFactory(loggerFactory, saver, connector, config);
         final PlayerDataStorage playerDataStorage = new PlayerDataStorage(loggerFactory.create(PlayerDataStorage.class),
                 playerDataFactory, profileProvider);
 

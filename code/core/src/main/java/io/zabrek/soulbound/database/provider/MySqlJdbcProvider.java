@@ -63,7 +63,7 @@ public class MySqlJdbcProvider implements ConnectionProvider {
     @Override
     public Connection create() {
         Connection connection = null;
-        final String jdbcPath = "jdbc:mysql://%s:%s/%s?allowPublicKeyRetrieval=true&&useSSL=false".formatted(this.hostname, this.port, this.database);
+        final String jdbcPath = "jdbc:mysql://%s:%s/%s?allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&useSSL=false".formatted(this.hostname, this.port, this.database);
 
         try {
             log.debug("Checking for MySQL JDBC driver...");

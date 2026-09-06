@@ -250,23 +250,24 @@ public final class Backup {
         final ConfigurationSection profile = config.getConfigurationSection("profile");
         if (profile != null) {
             for (final String key : profile.getKeys(false)) {
-                con.updateSQL(UpdateType.INSERT_PROFILE, new Arguments(
+                con.updateSQL(UpdateType.ADD_PROFILE, new Arguments(
                         profile.getString(key + ".profileID")));
             }
         }
         final ConfigurationSection player = config.getConfigurationSection("player");
         if (player != null) {
             for (final String key : player.getKeys(false)) {
-                con.updateSQL(UpdateType.INSERT_PLAYER, new Arguments(
+                con.updateSQL(UpdateType.ADD_PLAYER, new Arguments(
                         player.getString(key + ".playerID"),
                         player.getString(key + ".active_profile"),
-                        player.getString(key + ".language")));
+                        player.getString(key + ".language"),
+                        player.getString(key + ".active_skill")));
             }
         }
         final ConfigurationSection playerProfile = config.getConfigurationSection("player_profile");
         if (playerProfile != null) {
             for (final String key : playerProfile.getKeys(false)) {
-                con.updateSQL(UpdateType.INSERT_PLAYER_PROFILE, new Arguments(
+                con.updateSQL(UpdateType.ADD_PLAYER_PROFILE, new Arguments(
                         playerProfile.getString(key + ".playerID"),
                         playerProfile.getString(key + ".profileID"),
                         playerProfile.getString(key + ".name")));
@@ -275,7 +276,7 @@ public final class Backup {
         final ConfigurationSection level = config.getConfigurationSection("level");
         if (level != null) {
             for (final String key : level.getKeys(false)) {
-                con.updateSQL(UpdateType.INSERT_LEVEL, new Arguments(
+                con.updateSQL(UpdateType.ADD_LEVEL, new Arguments(
                         level.getString(key + ".profileID"),
                         level.getString(key + ".skill"),
                         level.getInt(key + ".level"),
@@ -285,7 +286,7 @@ public final class Backup {
         final ConfigurationSection cooldown = config.getConfigurationSection("cooldown");
         if (cooldown != null) {
             for (final String key : cooldown.getKeys(false)) {
-                con.updateSQL(UpdateType.INSERT_COOLDOWN, new Arguments(
+                con.updateSQL(UpdateType.ADD_COOLDOWN, new Arguments(
                         cooldown.getString(key + ".profileID"),
                         cooldown.getString(key + ".skill"),
                         cooldown.getString(key + ".time")));
@@ -294,7 +295,7 @@ public final class Backup {
         final ConfigurationSection triggers = config.getConfigurationSection("triggers");
         if (triggers != null) {
             for (final String key : triggers.getKeys(false)) {
-                con.updateSQL(UpdateType.INSERT_TRIGGER, new Arguments(
+                con.updateSQL(UpdateType.ADD_TRIGGERS, new Arguments(
                         triggers.getString(key, "profileID"),
                         triggers.getString(key, "trigger"),
                         triggers.getString(key, "instructions")

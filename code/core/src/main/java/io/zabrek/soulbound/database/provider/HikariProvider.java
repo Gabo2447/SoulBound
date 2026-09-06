@@ -73,6 +73,26 @@ public class HikariProvider implements ConnectionProvider {
      */
     public enum HikariDriver {
         /**
+         * SQLite driver configuration for HikariCP.
+         * <p>
+         * Takes one argument:
+         * <ul>
+         * <li>0: the absolute path to the database file</li>
+         * </ul>
+         */
+        SQLITE(1, args -> {
+            final HikariConfig hikariConfig = new HikariConfig();
+            hikariConfig.setPoolName("soulbound-sqlite-pool");
+            hikariConfig.setDriverClassName("org.sqlite.JDBC");
+            hikariConfig.setJdbcUrl("jdbc:sqlite:%s".formatted(args[0]));
+            hikariConfig.setMaximumPoolSize(1);
+            hikariConfig.setInitializationFailTimeout(-1);
+            hikariConfig.addDataSourceProperty("journal_mode", "WAL");
+            hikariConfig.addDataSourceProperty("synchronous", "NORMAL");
+            hikariConfig.addDataSourceProperty("busy_timeout", "5000");
+            return hikariConfig;
+        }),
+        /**
          * MySQL driver configuration for HikariCP.
          * <p>
          * Takes five arguments:
@@ -86,14 +106,15 @@ public class HikariProvider implements ConnectionProvider {
          */
         MYSQL(5, args -> {
             final HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setPoolName("betonquest-mysql-pool");
-            hikariConfig.setJdbcUrl("jdbc:mysql://%s:%s/%s?useSSL=false".formatted(args[0], args[1], args[2]));
+            hikariConfig.setPoolName("soulbound-mysql-pool");
+            hikariConfig.setJdbcUrl("jdbc:mysql://%s:%s/%s?createDatabaseIfNotExist=true&useSSL=false".formatted(args[0], args[1], args[2]));
             hikariConfig.setUsername(args[3]);
             hikariConfig.setPassword(args[4]);
             hikariConfig.addDataSourceProperty("allowPublicKeyRetrieval", "true");
             hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
             hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
             hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            hikariConfig.addDataSourceProperty("createDatabaseIfNotExist", "true");
             return hikariConfig;
         });
 

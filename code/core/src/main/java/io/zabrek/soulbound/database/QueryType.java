@@ -11,7 +11,7 @@ public enum QueryType {
     /**
      * Get the triggers of a profile. ProfileID.
      */
-    SELECT_TRIGGERS(prefix -> "SELECT trigger, instructions FROM " + prefix + "triggers WHERE profileID = ?;"),
+    SELECT_TRIGGERS(prefix -> "SELECT triggers, instructions FROM " + prefix + "triggers WHERE profileID = ?;"),
     /**
      * Get the cooldown of a profile. ProfileID.
      */
@@ -23,7 +23,7 @@ public enum QueryType {
     /**
      * Get the current language of a profile. ProfileID.
      */
-    SELECT_PLAYER(prefix -> "SELECT language FROM " + prefix + "player WHERE playerID = ?;"),
+    SELECT_PLAYER(prefix -> "SELECT language, skill_active FROM " + prefix + "player WHERE playerID = ?;"),
 
     /**
      * Get all triggers.

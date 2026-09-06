@@ -1,10 +1,7 @@
 package io.zabrek.soulbound.database.provider;
 
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
-import org.bukkit.plugin.Plugin;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,11 +17,6 @@ public class SqliteJdbcProvider implements ConnectionProvider {
     private final SoulBoundLogger log;
 
     /**
-     * The plugin instance.
-     */
-    private final Plugin plugin;
-
-    /**
      * The location of the database file.
      */
     private final String dbLocation;
@@ -33,38 +25,18 @@ public class SqliteJdbcProvider implements ConnectionProvider {
      * Creates a new SQLite JDBC provider.
      *
      * @param log        the logger instance
-     * @param plugin     the plugin instance
-     * @param dbLocation the location of the database file
+     * @param dbLocation the absolute path location of the database file
      */
-    public SqliteJdbcProvider(final SoulBoundLogger log, final Plugin plugin, final String dbLocation) {
+    public SqliteJdbcProvider(final SoulBoundLogger log, final String dbLocation) {
         this.log = log;
-        this.plugin = plugin;
         this.dbLocation = dbLocation;
     }
 
     @Override
     public Connection create() {
-        if (!plugin.getDataFolder().exists() && !plugin.getDataFolder().mkdirs()) {
-            log.error("unable to create plugin data folder!");
-        }
-
-        final File file = new File(plugin.getDataFolder(), dbLocation);
-        if (!file.exists()) {
-            log.debug("SQLite database file does not exist, creating new file '%s'".formatted(file.getPath()));
-            try {
-                if (file.createNewFile()) {
-                    log.debug("Created SQLite database file '%s'".formatted(file.getPath()));
-                } else {
-                    log.error("Unable to create SQLite database '%s'!".formatted(file.getPath()));
-                }
-            } catch (final IOException e) {
-                log.error("Unable to create database!", e);
-            }
-        }
-
         Connection conn = null;
         try {
-            final String jdbcPath = "jdbc:sqlite:%s/%s".formatted(plugin.getDataFolder().toPath(), dbLocation);
+            final String jdbcPath = "jdbc:sqlite:%s?busy_timeout=5000".formatted(dbLocation);
 
             log.debug("Checking for SQLite JDBC driver...");
             Class.forName("org.sqlite.JDBC");

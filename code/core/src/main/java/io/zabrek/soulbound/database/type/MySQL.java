@@ -77,6 +77,9 @@ public class MySQL extends Database {
 
     private void migration1(final Connection connection) throws SQLException {
         log.debug("Running MySQL migration 1 (initial table creation)...");
+        final boolean originalAutoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "cooldown ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY, "
@@ -86,7 +89,8 @@ public class MySQL extends Database {
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "player ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY, "
                     + "playerID VARCHAR(256) NOT NULL, "
-                    + "language VARCHAR(16) NOT NULL) ENGINE=InnoDB;");
+                    + "language VARCHAR(16) NOT NULL, "
+                    + "skill_active VARCHAR(32) NOT NULL) ENGINE=InnoDB;");
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "level ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY, "
                     + "playerID VARCHAR(256) NOT NULL, "
@@ -96,49 +100,64 @@ public class MySQL extends Database {
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "triggers ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY, "
                     + "playerID VARCHAR(256) NOT NULL, "
-                    + "trigger VARCHAR(512) NOT NULL, "
-                    + "instructions VARCHAR(2048) NOT NULL);");
+                    + "triggers VARCHAR(512) NOT NULL, "
+                    + "instructions VARCHAR(2048) NOT NULL) ENGINE=InnoDB;");
+
+            connection.commit();
+        } catch (final SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(originalAutoCommit);
         }
     }
 
     @SuppressFBWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
     private void migration2(final Connection connection) throws SQLException {
         log.debug("Running MySQL migration 2 (profiles table migration)...");
+        final boolean originalAutoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "profile ("
                     + "profileID CHAR(36) NOT NULL PRIMARY KEY) ENGINE=InnoDB;");
             stmt.executeUpdate("INSERT IGNORE INTO " + prefix + "profile (profileID) "
                     + "SELECT playerID FROM " + prefix + "player;");
-
+            stmt.executeUpdate("DELETE c1 FROM " + prefix + "cooldown c1 INNER JOIN " + prefix + "cooldown c2 "
+                    + "WHERE c1.id < c2.id AND c1.playerID = c2.playerID AND c1.skill = c2.skill;");
             stmt.executeUpdate("ALTER TABLE " + prefix + "cooldown "
                     + "CHANGE COLUMN playerID profileID CHAR(36) NOT NULL, "
-                    + "MODIFY COLUMN skill VARCHAR(512) NOT NULL, "
+                    + "CHANGE COLUMN skill skill VARCHAR(512) NOT NULL, "
                     + "DROP PRIMARY KEY, "
                     + "DROP COLUMN id, "
                     + "ADD PRIMARY KEY (profileID, skill), "
                     + "ADD FOREIGN KEY (profileID) REFERENCES " + prefix + "profile (profileID) ON DELETE CASCADE;");
 
+            stmt.executeUpdate("DELETE l1 FROM " + prefix + "level l1 INNER JOIN " + prefix + "level l2 "
+                    + "WHERE l1.id < l2.id AND l1.playerID = l2.playerID AND l1.skill = l2.skill;");
             stmt.executeUpdate("ALTER TABLE " + prefix + "level "
-                    + "MODIFY COLUMN playerID profileID CHAR(36) NOT NULL, "
-                    + "MODIFY COLUMN skill VARCHAR(256) NOT NULL, "
+                    + "CHANGE COLUMN playerID profileID CHAR(36) NOT NULL, "
+                    + "CHANGE COLUMN skill skill VARCHAR(256) NOT NULL, "
                     + "DROP PRIMARY KEY, "
                     + "DROP COLUMN id, "
                     + "ADD PRIMARY KEY (profileID, skill), "
                     + "ADD FOREIGN KEY (profileID) REFERENCES " + prefix + "profile (profileID) ON DELETE CASCADE;");
 
+            stmt.executeUpdate("DELETE t1 FROM " + prefix + "triggers t1 INNER JOIN " + prefix + "triggers t2 "
+                    + "WHERE t1.id < t2.id AND t1.playerID = t2.playerID AND t1.triggers = t2.triggers;");
             stmt.executeUpdate("ALTER TABLE " + prefix + "triggers "
-                    + "MODIFY COLUMN playerID profileID CHAR(36) NOT NULL, "
+                    + "CHANGE COLUMN playerID profileID CHAR(36) NOT NULL, "
                     + "DROP PRIMARY KEY, "
                     + "DROP COLUMN id, "
-                    + "ADD PRIMARY KEY (profileID, trigger), "
-                    + "ADD FOREIGN KEY (profileID) REFERENCES " + prefix + "profile (profileID) ON DELETE CASCADE;)");
+                    + "ADD PRIMARY KEY (profileID, triggers), "
+                    + "ADD FOREIGN KEY (profileID) REFERENCES " + prefix + "profile (profileID) ON DELETE CASCADE;");
 
             stmt.executeUpdate("ALTER TABLE " + prefix + "player "
-                    + "MODIFY COLUMN playerID CHAR(36) NOT NULL, "
+                    + "CHANGE COLUMN playerID playerID CHAR(36) NOT NULL, "
                     + "ADD COLUMN active_profile CHAR(36) AFTER language;");
             stmt.executeUpdate("UPDATE " + prefix + "player SET active_profile = playerID;");
             stmt.executeUpdate("ALTER TABLE " + prefix + "player "
-                    + "MODIFY COLUMN active_profile CHAR(36) NOT NULL, "
+                    + "CHANGE COLUMN active_profile active_profile CHAR(36) NOT NULL, "
                     + "DROP PRIMARY KEY, "
                     + "DROP COLUMN id, "
                     + "ADD PRIMARY KEY (playerID), "
@@ -154,17 +173,40 @@ public class MySQL extends Database {
                     + "FOREIGN KEY (profileID) REFERENCES " + prefix + "profile (profileID) ON DELETE CASCADE) ENGINE=InnoDB;");
             stmt.executeUpdate("INSERT IGNORE INTO " + prefix + "player_profile (playerID, profileID, name) "
                     + "SELECT playerID, active_profile, NULL FROM " + prefix + "player;");
+
+            connection.commit();
+        } catch (final SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(originalAutoCommit);
         }
     }
 
     @SuppressFBWarnings("SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE")
     private void migration3(final Connection connection) throws SQLException {
         log.debug("Running MySQL migration 3 (player_profile name migration)...");
-        try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("UPDATE " + prefix + "player_profile "
-                    + "SET name = '" + profileInitialName + "' WHERE name IS NULL;");
-            stmt.executeUpdate("ALTER TABLE " + prefix + "player_profile "
-                    + "MODIFY COLUMN name VARCHAR(63) NOT NULL;");
+        final boolean originalAutoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+
+        try {
+            try (PreparedStatement updateStmt = connection.prepareStatement(
+                    "UPDATE " + prefix + "player_profile SET name = ? WHERE name IS NULL")) {
+                updateStmt.setString(1, profileInitialName);
+                updateStmt.executeUpdate();
+            }
+
+            try (Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("ALTER TABLE " + prefix + "player_profile "
+                        + "MODIFY COLUMN name VARCHAR(63) NOT NULL;");
+            }
+
+            connection.commit();
+        } catch (final SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(originalAutoCommit);
         }
     }
 }

@@ -2,6 +2,7 @@ package io.zabrek.soulbound.api.listener.service;
 
 import io.zabrek.soulbound.api.data.CooldownRecord;
 import io.zabrek.soulbound.api.data.LevelRecord;
+import io.zabrek.soulbound.api.data.Skills;
 import io.zabrek.soulbound.api.listeners.service.ListenerDataService;
 import io.zabrek.soulbound.api.listeners.service.ListenerPlayerData;
 import io.zabrek.soulbound.api.profile.Profile;
@@ -52,6 +53,18 @@ public class DefaultListenerDataService implements ListenerDataService {
     }
 
     @Override
+    public String getLanguage(final Profile profile) {
+        final PlayerData playerData = playerDataStorage.get(profile);
+        return playerData.getLanguage().orElse("default");
+    }
+
+    @Override
+    public Skills getActiveSkill(final Profile profile) {
+        final PlayerData playerData = playerDataStorage.get(profile);
+        return playerData.getSkill();
+    }
+
+    @Override
     public void update(final Profile profile, final ListenerPlayerData freshData) {
         final PlayerData playerData = playerDataStorage.get(profile);
         playerData.setCooldowns(freshData.getCooldown());
@@ -61,7 +74,7 @@ public class DefaultListenerDataService implements ListenerDataService {
     @Override
     public void updateLevel(final Profile profile, final LevelRecord freshData) {
         final PlayerData playerData = playerDataStorage.get(profile);
-        playerData.addLevel(freshData);
+        playerData.updateLevel(freshData);
     }
 
     @Override
@@ -83,6 +96,18 @@ public class DefaultListenerDataService implements ListenerDataService {
     }
 
     @Override
+    public void updateLanguage(final Profile profile, final String language) {
+        final PlayerData playerData = playerDataStorage.get(profile);
+        playerData.setLanguage(language);
+    }
+
+    @Override
+    public void updateActiveSkill(final Profile profile, final Skills skillID) {
+        final PlayerData playerData = playerDataStorage.get(profile);
+        playerData.setSkill(skillID);
+    }
+
+    @Override
     public void remove(final Profile profile) {
         final PlayerData playerData = playerDataStorage.get(profile);
         playerData.purgePlayer();
@@ -99,20 +124,6 @@ public class DefaultListenerDataService implements ListenerDataService {
         final PlayerData playerData = playerDataStorage.get(profile);
         for (final CooldownRecord record : removeData) {
             playerData.removeCooldown(record);
-        }
-    }
-
-    @Override
-    public void removeLevel(final Profile profile, final LevelRecord removeData) {
-        final PlayerData playerData = playerDataStorage.get(profile);
-        playerData.removeLevel(removeData);
-    }
-
-    @Override
-    public void removeLevel(final Profile profile, final List<LevelRecord> removeData) {
-        final PlayerData playerData = playerDataStorage.get(profile);
-        for (final LevelRecord record : removeData) {
-            playerData.removeLevel(record);
         }
     }
 }
