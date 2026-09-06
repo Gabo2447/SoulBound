@@ -2,6 +2,9 @@ package io.zabrek.soulbound.listeners.death;
 
 import org.bukkit.entity.EntityType;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  * Calculates the difficulty to kill mobs.
  */
@@ -70,6 +73,17 @@ public enum MobComplexity {
     ENDER_DRAGON(EntityType.ENDER_DRAGON, 25.5);
 
     /**
+     * Internal map that associates each entity type with its complexity value.
+     */
+    private static final Map<EntityType, Double> COMPLEXITY_MAP = new EnumMap<>(EntityType.class);
+
+    static {
+        for (final MobComplexity mob : values()) {
+            COMPLEXITY_MAP.put(mob.entityType, mob.complexity);
+        }
+    }
+
+    /**
      * The entity.
      */
     private final EntityType entityType;
@@ -82,6 +96,16 @@ public enum MobComplexity {
     MobComplexity(final EntityType entityType, final double complexity) {
         this.entityType = entityType;
         this.complexity = complexity;
+    }
+
+    /**
+     * Static method to get the complexity for any mob.
+     *
+     * @param type the mob
+     * @return the complexity
+     */
+    public static double getComplexityOf(final EntityType type) {
+        return COMPLEXITY_MAP.getOrDefault(type, 1.0);
     }
 
     /**
@@ -100,20 +124,5 @@ public enum MobComplexity {
      */
     public double getComplexity() {
         return complexity;
-    }
-
-    /**
-     * Static method to get the complexity for any mob.
-     *
-     * @param type the mob
-     * @return the complexity
-     */
-    public static double getComplexityOf(final EntityType type) {
-        for (final MobComplexity mob : values()) {
-            if (mob.entityType == type) {
-                return mob.complexity;
-            }
-        }
-        return 1.0; // Valor por defecto para mobs no listados
     }
 }

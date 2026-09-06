@@ -10,6 +10,8 @@ import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.id.listener.ListenerIdentifierFactory;
 import io.zabrek.soulbound.listeners.death.EntityDeathFactory;
 import io.zabrek.soulbound.listeners.join.PlayerJoinFactory;
+import io.zabrek.soulbound.listeners.ui.VisualEventFactory;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,12 +32,13 @@ public final class ListenerTypeRegistry {
      * @param loggerFactory             the factory used to create loggers
      */
     public static void load(final ListenerServiceProvider serviceProvider, final ListenerIdentifierFactory listenerIdentifierFactory,
-                            final SoulBoundLoggerFactory loggerFactory) {
+                            final SoulBoundLoggerFactory loggerFactory, final Plugin plugin) {
         final SoulBoundLogger log = loggerFactory.create(ListenerTypeRegistry.class);
 
         final Map<String, ListenerFactory> factories = new HashMap<>();
         factories.put("join", new PlayerJoinFactory());
         factories.put("death", new EntityDeathFactory());
+        factories.put("ui", new VisualEventFactory(plugin));
 
         try {
             log.info("Loading %d listener components...".formatted(factories.size()));

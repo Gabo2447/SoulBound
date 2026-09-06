@@ -46,7 +46,7 @@ public class ListenersComponent implements CoreComponent {
                 loggerFactory, profileProvider, plugin, playerDataStorage
         );
         final ListenerIdentifierFactory listenerIdentifierFactory = new ListenerIdentifierFactory();
-        ListenerTypeRegistry.load(listenerServiceProvider, listenerIdentifierFactory, loggerFactory);
+        ListenerTypeRegistry.load(listenerServiceProvider, listenerIdentifierFactory, loggerFactory, plugin);
 
         provider.take(ListenerIdentifierFactory.class, listenerIdentifierFactory);
         provider.take(ListenerServiceProvider.class, listenerServiceProvider);
