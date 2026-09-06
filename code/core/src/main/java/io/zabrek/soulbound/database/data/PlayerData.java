@@ -78,11 +78,11 @@ public class PlayerData {
     /**
      * Loads the PlayerData of the given {@link Profile}.
      *
-     * @param log                the custom logger for this class
-     * @param saver              the saver to persist data changes
-     * @param connector          the database connector to use
-     * @param profile            the profile to load the data for
-     * @param config             the config accessor
+     * @param log       the custom logger for this class
+     * @param saver     the saver to persist data changes
+     * @param connector the database connector to use
+     * @param profile   the profile to load the data for
+     * @param config    the config accessor
      */
     public PlayerData(final SoulBoundLogger log, final Saver saver, final Connector connector, final Profile profile,
                       final ConfigAccessor config) {
@@ -93,7 +93,7 @@ public class PlayerData {
         this.profileID = profile.getProfileUUID().toString();
         this.config = config;
         this.profileLanguage = null;
-        this.skillActive = Skills.getDefault();
+        this.skillActive = Skills.DEFAULT_SKILL;
 
         try {
             loadAllPlayerData();
@@ -153,7 +153,7 @@ public class PlayerData {
         final String playerUniqueID = profile.getPlayer().getUniqueId().toString();
 
         saver.add(new Saver.Record(UpdateType.ADD_PROFILE, profileID));
-        saver.add(new Saver.Record(UpdateType.ADD_PLAYER, playerUniqueID, profileID, "en", Skills.getDefault().getId()));
+        saver.add(new Saver.Record(UpdateType.ADD_PLAYER, playerUniqueID, profileID, "en", Skills.DEFAULT_SKILL.getId()));
         saver.add(new Saver.Record(UpdateType.ADD_PLAYER_PROFILE, playerUniqueID, profileID,
                 config.getString("profile.initial_name", "default")));
 

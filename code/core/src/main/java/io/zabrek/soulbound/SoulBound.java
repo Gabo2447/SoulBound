@@ -21,6 +21,8 @@ import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.NoSuchElementException;
+
 /**
  * Represents SoulBound plugin.
  */
@@ -64,8 +66,8 @@ public class SoulBound extends JavaPlugin {
 
         try {
             loader.load();
-        } catch (final Exception e) {
-            log.error("Failed to load SoulBound components: " + e.getMessage());
+        } catch (final NoSuchElementException | IllegalStateException e) {
+            log.error("Failed to load SoulBound components: %s".formatted(e.getMessage()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }

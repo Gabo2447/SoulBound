@@ -106,7 +106,7 @@ public abstract class Database {
                     markMigrationExecuted(conn, key);
                     log.debug("Migration '%s' successfully executed".formatted(key));
                 }
-            } catch (SQLException | RuntimeException e) {
+            } catch (final SQLException e) {
                 conn.rollback();
                 log.error("Migration failed, rolling back changes.", e);
                 throw new IllegalStateException("Database migration failed. Halting application startup.", e);

@@ -13,7 +13,7 @@ import java.util.Map;
  * A default implementation of the {@link Identifiers} interface.
  */
 public class IdentifierTypeRegistry implements Identifiers {
-    
+
     /**
      * Custom {@link SoulBoundLogger} instance for this class.
      */

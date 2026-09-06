@@ -80,7 +80,7 @@ public class DebugHandlerConfig {
             config.save();
         }
     }
-    
+
     /**
      * Gets how long {@link LogRecord}s stay in a cache.
      * <p>

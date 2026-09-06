@@ -15,7 +15,8 @@ public class PlayerJoinFactory implements ListenerFactory {
     /**
      * Creates a new PlayerJonFactory.
      */
-    public PlayerJoinFactory() {}
+    public PlayerJoinFactory() {
+    }
 
     @Override
     public Listener create(final ListenerService service) throws SoulBoundException {

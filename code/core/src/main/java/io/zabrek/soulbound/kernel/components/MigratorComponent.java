@@ -34,7 +34,7 @@ public class MigratorComponent implements CoreComponent {
     public void load(final DependencyProvider provider) {
         final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
         final SoulBoundLogger logger = loggerFactory.create(MigratorComponent.class);
-        
+
         try {
             final Migrator migrator = new Migrator(loggerFactory);
             migrator.migrate();

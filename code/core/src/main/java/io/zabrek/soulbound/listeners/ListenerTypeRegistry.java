@@ -30,6 +30,7 @@ public final class ListenerTypeRegistry {
      * @param serviceProvider           the provider for listener services
      * @param listenerIdentifierFactory the factory for parsing listener identifiers
      * @param loggerFactory             the factory used to create loggers
+     * @param plugin                    the plugin instance
      */
     public static void load(final ListenerServiceProvider serviceProvider, final ListenerIdentifierFactory listenerIdentifierFactory,
                             final SoulBoundLoggerFactory loggerFactory, final Plugin plugin) {

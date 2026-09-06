@@ -59,17 +59,14 @@ public class EntityDeath extends DefaultListener {
         final List<LevelRecord> data = dataService.getLevels(profile);
         final Skills skill = dataService.getActiveSkill(profile);
 
-        for (final LevelRecord level : data) {
-            if (level.skill() != skill) {
-                continue;
-            }
-
-            final LevelRecord levelRecord = calcLevel(level, expToAdd);
-            new PlayerLevelChangeEvent(profile, false, levelRecord, expToAdd).callEvent();
-
-            dataService.updateLevel(profile, levelRecord);
-            break;
-        }
+        data.stream()
+                .filter(level -> level.skill() == skill)
+                .findFirst()
+                .ifPresent(level -> {
+                    final LevelRecord levelRecord = calcLevel(level, expToAdd);
+                    new PlayerLevelChangeEvent(profile, false, levelRecord, expToAdd).callEvent();
+                    dataService.updateLevel(profile, levelRecord);
+                });
     }
 
     private LevelRecord calcLevel(final LevelRecord record, final double expToAdd) {
@@ -88,8 +85,8 @@ public class EntityDeath extends DefaultListener {
         return new LevelRecord(record.skill(), level, experience);
     }
 
-    private double calcExpToAdd(final double xp, final EntityDeathEvent event) {
+    private double calcExpToAdd(final double experience, final EntityDeathEvent event) {
         final double multiplier = MobComplexity.getComplexityOf(event.getEntityType());
-        return xp * (1.0 + multiplier);
+        return experience * (1.0 + multiplier);
     }
 }

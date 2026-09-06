@@ -33,7 +33,7 @@ public enum Skills {
     /**
      * Default skill.
      */
-    static final Skills DEFAULT_SKILL = Skills.SEISMIC_IMPACT;
+    public static final Skills DEFAULT_SKILL = SEISMIC_IMPACT;
 
     /**
      * The name to display.
@@ -43,39 +43,30 @@ public enum Skills {
     /**
      * The identifier.
      */
-    private final String id;
+    private final String identifier;
 
-    Skills(final String displayName, final String id) {
+    Skills(final String displayName, final String identifier) {
         this.displayName = displayName;
-        this.id = id;
+        this.identifier = identifier;
     }
 
     /**
      * Gets a skill by its string identifier.
      *
-     * @param id the unique string identifier of the skill
+     * @param identifier the unique string identifier of the skill
      * @return a containing the matching skill, or Seismic Impact (default)
      */
-    public static Skills fromId(final String id) {
-        if (id.isBlank()) {
+    public static Skills fromId(final String identifier) {
+        if (identifier.isBlank()) {
             return DEFAULT_SKILL;
         }
 
         for (final Skills skill : values()) {
-            if (skill.id.equalsIgnoreCase(id)) {
+            if (skill.identifier.equalsIgnoreCase(identifier)) {
                 return skill;
             }
         }
 
-        return DEFAULT_SKILL;
-    }
-
-    /**
-     * Gets the default skill.
-     *
-     * @return skill
-     */
-    public static Skills getDefault() {
         return DEFAULT_SKILL;
     }
 
@@ -85,7 +76,7 @@ public enum Skills {
      * @return the id
      */
     public String getId() {
-        return id;
+        return identifier;
     }
 
     /**

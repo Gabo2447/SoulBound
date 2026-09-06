@@ -108,8 +108,10 @@ public final class DatabaseBuilder<T extends Database> {
 
         try {
             return dbClass.getDeclaredConstructor(DatabaseConfig.class).newInstance(config);
-        } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException |
-                       InvocationTargetException e) {
+        } catch (final NoSuchMethodException
+                       | InstantiationException
+                       | IllegalAccessException
+                       | InvocationTargetException e) {
             throw new IllegalStateException("Failed to instantiate '%s'".formatted(dbClass.getName()), e);
         }
     }

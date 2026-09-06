@@ -6,7 +6,6 @@ package io.zabrek.soulbound.database;
  * @param namespace name of the plugin
  * @param version   version of the migration
  */
-@SuppressWarnings("PMD.OverrideBothEqualsAndHashCodeOnComparable")
 public record MigrationKey(
         String namespace,
         int version
