@@ -3,10 +3,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Gabo2447/SoulBound"><img alt="license" src="https://shieldcn.dev/github/Gabo2447/SoulBound/license.svg" /></a>
-  <a href="https://github.com/Gabo2447/SoulBound/releases"><img alt="release" src="https://shieldcn.dev/github/Gabo2447/SoulBound/release.svg" /></a>
-  <a href="https://github.com/Gabo2447/SoulBound/commits"><img alt="last commit" src="https://shieldcn.dev/github/Gabo2447/SoulBound/last-commit.svg" /></a>
-  <a href="https://github.com/Gabo2447/SoulBound/actions"><img alt="CI" src="https://shieldcn.dev/github/Gabo2447/SoulBound/ci.svg?variant=destructive" /></a>
+  <a href="https://github.com/SoulBound-Java/SoulBound"><img alt="license" src="https://shieldcn.dev/github/SoulBound-Java/SoulBound/license.svg" /></a>
+  <a href="https://github.com/SoulBound-Java/SoulBound/releases"><img alt="release" src="https://shieldcn.dev/github/SoulBound-Java/SoulBound/release.svg" /></a>
+  <a href="https://github.com/SoulBound-Java/SoulBound/commits"><img alt="last commit" src="https://shieldcn.dev/github/SoulBound-Java/SoulBound/last-commit.svg" /></a>
+  <a href="https://github.com/SoulBound-Java/SoulBound/actions"><img alt="CI" src="https://shieldcn.dev/github/SoulBound-Java/SoulBound/ci.svg?variant=destructive" /></a>
 </p>
 
 ## Overview
@@ -33,7 +33,7 @@ Ensure your server environment meets the following minimum requirements:
 ### Installation
 
 1. **Download the Plugin:** Grab the latest `SoulBound-x.x.x.jar` release from
-   the [Releases Tab](https://github.com/Gabo2447/SoulBound/releases).
+   the [Releases Tab](https://github.com/SoulBound-Java/SoulBound/releases).
 2. **Deploy the File:** Place the downloaded `.jar` file into your server's `plugins/` directory.
 3. **Start the Server:** Launch your server to generate the configuration files and default SQLite database.
 
@@ -54,5 +54,5 @@ Ensure your server environment meets the following minimum requirements:
 | `/soulbound reset <player>` | `soulbound.admin` | Resets all skills and stats for a specific player. |
 
 <p align="center">
-  <a href="https://github.com/Gabo2447/SoulBound/graphs/contributors"><img alt="contributors" src="https://shieldcn.dev/contributors/Gabo2447/SoulBound.svg?mode=dark" /></a>
+  <a href="https://github.com/SoulBound-Java/SoulBound/graphs/contributors"><img alt="contributors" src="https://shieldcn.dev/contributors/SoulBound-Java/SoulBound.svg?mode=dark" /></a>
 </p>

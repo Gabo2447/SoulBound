@@ -31,7 +31,7 @@ jobs:
       - uses: BetonQuest/Workflows/.github/actions/version@main
         id: version
         with:
-          ROOT_REPOSITORY: Gabo2447/SoulBound
+          ROOT_REPOSITORY: SoulBound-Java/SoulBound
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_WRAPPER_DIR: '~/.m2/wrapper'
           SUB_MODULE: 'soulbound'
