@@ -1,6 +1,6 @@
 package io.zabrek.soulbound.kernel;
 
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.CoreComponent;
 import io.zabrek.soulbound.kernel.components.AsyncSaverComponent;
 import io.zabrek.soulbound.kernel.components.ConfigAccessorFactoryComponent;
 import io.zabrek.soulbound.kernel.components.ConfigComponent;
@@ -35,11 +35,10 @@ public final class SoulBoundComponents {
     /**
      * Creates and returns a set containing all default core components.
      *
-     * @param plugin the main JavaPlugin instance
      * @return a set of default core components
-     * @since 1.0.0
+     * @since 2.0.0
      */
-    public static Set<CoreComponent> createDefaults(final JavaPlugin plugin) {
+    public static Set<CoreComponent> createDefaults() {
         return Stream.of(createEssentials(), createDefaultFeatures(), createDefaultTypes(),
                 createAdditionalFeatures(), createIntegrationsAndAPI()
         ).flatMap(Set::stream).collect(Collectors.toSet());

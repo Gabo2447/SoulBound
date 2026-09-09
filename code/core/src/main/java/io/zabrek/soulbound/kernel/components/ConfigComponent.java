@@ -3,14 +3,14 @@ package io.zabrek.soulbound.kernel.components;
 import dev.faststats.data.Metric;
 import io.zabrek.soulbound.api.config.ConfigAccessorFactory;
 import io.zabrek.soulbound.api.config.FileConfigAccessor;
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.api.reload.ReloadPhase;
 import io.zabrek.soulbound.api.reload.Reloader;
 import io.zabrek.soulbound.faststats.FastStatsMetricsProvider;
-import io.zabrek.soulbound.kernel.DependencyProvider;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * The implementation of {@link CoreComponent} for {@link FileConfigAccessor}.
+ * The implementation of {@link AbstractCoreComponent} for {@link FileConfigAccessor}.
  */
-public class ConfigComponent implements CoreComponent {
+public class ConfigComponent extends AbstractCoreComponent {
 
     /**
      * The configuration file name.
@@ -31,11 +31,12 @@ public class ConfigComponent implements CoreComponent {
      * Create a new ConfigComponent.
      */
     public ConfigComponent() {
+        super();
     }
 
     @Override
     public Set<Class<?>> requires() {
-        return Set.of(JavaPlugin.class, SoulBoundLoggerFactory.class, ConfigAccessorFactory.class, Reloader.class);
+        return Set.of(Plugin.class, SoulBoundLoggerFactory.class, ConfigAccessorFactory.class, Reloader.class);
     }
 
     @Override
@@ -45,9 +46,9 @@ public class ConfigComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final JavaPlugin plugin = provider.get(JavaPlugin.class);
-        final ConfigAccessorFactory configAccessorFactory = provider.get(ConfigAccessorFactory.class);
-        final Reloader reloader = provider.get(Reloader.class);
+        final Plugin plugin = getDependency(Plugin.class);
+        final ConfigAccessorFactory configAccessorFactory = getDependency(ConfigAccessorFactory.class);
+        final Reloader reloader = getDependency(Reloader.class);
 
         final File dataFolder = plugin.getDataFolder();
         final File configurationFile = new File(dataFolder, CONFIG_FILE);

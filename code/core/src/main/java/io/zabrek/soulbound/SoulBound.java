@@ -3,7 +3,7 @@ package io.zabrek.soulbound;
 import com.zaxxer.hikari.pool.HikariPool;
 import io.zabrek.soulbound.api.config.ConfigAccessor;
 import io.zabrek.soulbound.api.config.FileConfigAccessor;
-import io.zabrek.soulbound.api.kernel.CoreComponentLoader;
+import io.zabrek.soulbound.api.dependency.CoreComponentLoader;
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.api.profile.ProfileProvider;
@@ -12,7 +12,7 @@ import io.zabrek.soulbound.database.Connector;
 import io.zabrek.soulbound.database.Saver;
 import io.zabrek.soulbound.faststats.FastStatsMetrics;
 import io.zabrek.soulbound.kernel.SoulBoundComponents;
-import io.zabrek.soulbound.kernel.TopologicalCoreComponentLoader;
+import io.zabrek.soulbound.lib.dependency.component.DefaultCoreComponentLoader;
 import io.zabrek.soulbound.lib.logger.CachingSoulBoundLoggerFactory;
 import io.zabrek.soulbound.logger.DefaultSoulBoundLoggerFactory;
 import org.bukkit.Server;
@@ -82,10 +82,11 @@ public class SoulBound extends JavaPlugin {
         final SoulBoundLoggerFactory loggerFactory = new CachingSoulBoundLoggerFactory(new DefaultSoulBoundLoggerFactory());
         this.log = loggerFactory.create(this);
 
-        this.loader = new TopologicalCoreComponentLoader(loggerFactory.create(CoreComponentLoader.class));
+        this.loader = new DefaultCoreComponentLoader(loggerFactory.create(CoreComponentLoader.class));
         this.loader.init(SoulBoundLoggerFactory.class, loggerFactory);
+
         initPluginDependencies(loader);
-        SoulBoundComponents.createDefaults(this).forEach(loader::register);
+        SoulBoundComponents.createDefaults().forEach(loader::register);
     }
 
     @Override

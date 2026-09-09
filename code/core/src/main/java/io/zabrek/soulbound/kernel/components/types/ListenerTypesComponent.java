@@ -1,15 +1,15 @@
 package io.zabrek.soulbound.kernel.components.types;
 
 import io.zabrek.soulbound.api.SoulBoundException;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.identifier.ListenerIdentifier;
-import io.zabrek.soulbound.api.kernel.CoreComponent;
 import io.zabrek.soulbound.api.listeners.ListenerFactory;
 import io.zabrek.soulbound.api.listeners.service.ListenerService;
 import io.zabrek.soulbound.api.listeners.service.ListenerServiceProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.id.listener.ListenerIdentifierFactory;
-import io.zabrek.soulbound.kernel.DependencyProvider;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import io.zabrek.soulbound.listeners.death.EntityDeathFactory;
 import io.zabrek.soulbound.listeners.join.PlayerJoinFactory;
 import io.zabrek.soulbound.listeners.ui.VisualEventFactory;
@@ -20,14 +20,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The {@link CoreComponent} loading all listeners types.
+ * The {@link AbstractCoreComponent} loading all listeners types.
  */
-public class ListenerTypesComponent implements CoreComponent {
+public class ListenerTypesComponent extends AbstractCoreComponent {
 
     /**
      * Create a new ListenerTypesComponent.
      */
-    public ListenerTypesComponent() {}
+    public ListenerTypesComponent() {
+        super();
+    }
 
     @Override
     public Set<Class<?>> requires() {
@@ -36,16 +38,11 @@ public class ListenerTypesComponent implements CoreComponent {
     }
 
     @Override
-    public Set<Class<?>> provides() {
-        return Set.of();
-    }
-
-    @Override
     public void load(final DependencyProvider provider) {
-        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
-        final Plugin plugin = provider.get(Plugin.class);
-        final ListenerServiceProvider listenerServiceProvider = provider.get(ListenerServiceProvider.class);
-        final ListenerIdentifierFactory listenerIdentifierFactory = provider.get(ListenerIdentifierFactory.class);
+        final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
+        final Plugin plugin = getDependency(Plugin.class);
+        final ListenerServiceProvider listenerServiceProvider = getDependency(ListenerServiceProvider.class);
+        final ListenerIdentifierFactory listenerIdentifierFactory = getDependency(ListenerIdentifierFactory.class);
 
         final SoulBoundLogger log = loggerFactory.create(ListenerTypesComponent.class);
 

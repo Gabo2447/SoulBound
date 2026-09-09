@@ -1,21 +1,22 @@
 package io.zabrek.soulbound.kernel.components;
 
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
-import io.zabrek.soulbound.kernel.DependencyProvider;
 import io.zabrek.soulbound.kernel.registry.soul.IdentifierTypeRegistry;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 
 import java.util.Set;
 
 /**
- * The implementation of {@link CoreComponent} for {@link IdentifierTypeRegistry}.
+ * The implementation of {@link AbstractCoreComponent} for {@link IdentifierTypeRegistry}.
  */
-public class IdentifiersComponent implements CoreComponent {
+public class IdentifiersComponent extends AbstractCoreComponent {
 
     /**
      * Create a new IdentifiersComponent.
      */
     public IdentifiersComponent() {
+        super();
     }
 
     @Override
@@ -30,7 +31,7 @@ public class IdentifiersComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
+        final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
         final IdentifierTypeRegistry identifierTypeRegistry = new IdentifierTypeRegistry(loggerFactory.create(IdentifierTypeRegistry.class));
 
         provider.take(IdentifierTypeRegistry.class, identifierTypeRegistry);

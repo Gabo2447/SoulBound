@@ -1,20 +1,20 @@
 package io.zabrek.soulbound.kernel.components;
 
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.profile.ProfileProvider;
-import io.zabrek.soulbound.kernel.DependencyProvider;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import io.zabrek.soulbound.profile.DefaultProfileProvider;
 import org.bukkit.Server;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
 
 /**
- * The implementation of {@link CoreComponent} for {@link ProfileProvider}.
+ * The implementation of {@link AbstractCoreComponent} for {@link ProfileProvider}.
  */
-public class ProfileProviderComponent implements CoreComponent {
+public class ProfileProviderComponent extends AbstractCoreComponent {
 
     /**
      * Create a new ProfileProviderComponent.
@@ -22,10 +22,9 @@ public class ProfileProviderComponent implements CoreComponent {
     public ProfileProviderComponent() {
         super();
     }
-
     @Override
     public Set<Class<?>> requires() {
-        return Set.of(JavaPlugin.class, Server.class, ServicesManager.class);
+        return Set.of(Plugin.class, Server.class, ServicesManager.class);
     }
 
     @Override
@@ -35,11 +34,12 @@ public class ProfileProviderComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final JavaPlugin plugin = provider.get(JavaPlugin.class);
-        final Server server = provider.get(Server.class);
-        final ServicesManager servicesManager = provider.get(ServicesManager.class);
+        final Plugin plugin = getDependency(Plugin.class);
+        final Server server = getDependency(Server.class);
+        final ServicesManager servicesManager = getDependency(ServicesManager.class);
 
-        final ProfileProvider profileProvider = new DefaultProfileProvider(server);
+        final DefaultProfileProvider profileProvider = new DefaultProfileProvider(server);
+
         servicesManager.register(ProfileProvider.class, profileProvider, plugin, ServicePriority.Lowest);
         provider.take(ProfileProvider.class, servicesManager.load(ProfileProvider.class));
     }

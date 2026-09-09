@@ -1,9 +1,9 @@
 package io.zabrek.soulbound.kernel.components;
 
 import io.zabrek.soulbound.api.config.FileConfigAccessor;
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
-import io.zabrek.soulbound.kernel.DependencyProvider;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import io.zabrek.soulbound.logger.HandlerFactory;
 import io.zabrek.soulbound.logger.handler.history.HistoryHandler;
 import org.bukkit.Server;
@@ -17,14 +17,15 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 /**
- * The implementation of {@link CoreComponent} for log handlers.
+ * The implementation of {@link AbstractCoreComponent} for log handlers.
  */
-public class LogHandlerComponent implements CoreComponent {
+public class LogHandlerComponent extends AbstractCoreComponent {
 
     /**
      * Create a new LogHandlerComponent.
      */
     public LogHandlerComponent() {
+        super();
     }
 
     @Override
@@ -40,11 +41,11 @@ public class LogHandlerComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final Plugin plugin = provider.get(Plugin.class);
-        final Server server = provider.get(Server.class);
-        final BukkitScheduler scheduler = provider.get(BukkitScheduler.class);
-        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
-        final FileConfigAccessor config = provider.get(FileConfigAccessor.class);
+        final Plugin plugin = getDependency(Plugin.class);
+        final Server server = getDependency(Server.class);
+        final BukkitScheduler scheduler = getDependency(BukkitScheduler.class);
+        final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
+        final FileConfigAccessor config = getDependency(FileConfigAccessor.class);
 
         final HistoryHandler debugHistoryHandler = HandlerFactory.createHistoryHandler(loggerFactory, plugin,
                 scheduler, config, new File(plugin.getDataFolder(), "/logs"), InstantSource.system());

@@ -3,14 +3,14 @@ package io.zabrek.soulbound.kernel.components;
 import io.zabrek.soulbound.api.SoulBoundApi;
 import io.zabrek.soulbound.api.SoulBoundApiService;
 import io.zabrek.soulbound.api.bukkit.BukkitManager;
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.api.profile.ProfileProvider;
 import io.zabrek.soulbound.api.reload.Reloader;
 import io.zabrek.soulbound.api.service.DefaultSoulBoundApiService;
-import io.zabrek.soulbound.kernel.DependencyProvider;
 
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
@@ -20,18 +20,21 @@ import java.util.Set;
 import java.util.function.Function;
 
 /**
- * The implementation of {@link CoreComponent} for {@link DefaultSoulBoundApi}.
+ * The implementation of {@link AbstractCoreComponent} for {@link DefaultSoulBoundApi}.
  */
-public class SoulBoundApiComponent implements CoreComponent {
+@SuppressWarnings("PMD.CouplingBetweenObjects")
+public class SoulBoundApiComponent extends AbstractCoreComponent {
 
     /**
      * Create a new SoulBoundApiComponent.
      */
-    public SoulBoundApiComponent() {}
+    public SoulBoundApiComponent() {
+        super();
+    }
 
     @Override
     public Set<Class<?>> requires() {
-        return Set.of(Plugin.class, ServicesManager.class, SoulBoundLoggerFactory.class, Reloader.class);
+        return Set.of(Plugin.class, ServicesManager.class, SoulBoundLoggerFactory.class, Reloader.class, ProfileProvider.class);
     }
 
     @Override
@@ -41,11 +44,11 @@ public class SoulBoundApiComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final ServicesManager servicesManager = provider.get(ServicesManager.class);
-        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
-        final ProfileProvider profileProvider = provider.get(ProfileProvider.class);
-        final Reloader reloader = provider.get(Reloader.class);
-        final Plugin plugin = provider.get(Plugin.class);
+        final ServicesManager servicesManager = getDependency(ServicesManager.class);
+        final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
+        final ProfileProvider profileProvider = getDependency(ProfileProvider.class);
+        final Reloader reloader = getDependency(Reloader.class);
+        final Plugin plugin = getDependency(Plugin.class);
 
         final SoulBoundLogger serviceLogger = loggerFactory.create(SoulBoundApiService.class);
         final Function<Plugin, SoulBoundApi> defaultSoulBoundApiGenerator = callerPlugin -> {
