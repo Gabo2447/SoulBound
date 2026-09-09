@@ -1,5 +1,6 @@
 package io.zabrek.soulbound;
 
+import com.zaxxer.hikari.pool.HikariPool;
 import io.zabrek.soulbound.api.config.ConfigAccessor;
 import io.zabrek.soulbound.api.config.FileConfigAccessor;
 import io.zabrek.soulbound.api.kernel.CoreComponentLoader;
@@ -66,7 +67,8 @@ public class SoulBound extends JavaPlugin {
 
         try {
             loader.load();
-        } catch (final NoSuchElementException | IllegalStateException e) {
+        } catch (final NoSuchElementException | IllegalStateException
+                       | HikariPool.PoolInitializationException e) {
             log.error("Failed to load SoulBound components: %s".formatted(e.getMessage()));
             getServer().getPluginManager().disablePlugin(this);
             return;
