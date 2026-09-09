@@ -1,13 +1,15 @@
-package io.zabrek.soulbound.listeners;
+package io.zabrek.soulbound.kernel.components.types;
 
 import io.zabrek.soulbound.api.SoulBoundException;
 import io.zabrek.soulbound.api.identifier.ListenerIdentifier;
+import io.zabrek.soulbound.api.kernel.CoreComponent;
 import io.zabrek.soulbound.api.listeners.ListenerFactory;
 import io.zabrek.soulbound.api.listeners.service.ListenerService;
 import io.zabrek.soulbound.api.listeners.service.ListenerServiceProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.id.listener.ListenerIdentifierFactory;
+import io.zabrek.soulbound.kernel.DependencyProvider;
 import io.zabrek.soulbound.listeners.death.EntityDeathFactory;
 import io.zabrek.soulbound.listeners.join.PlayerJoinFactory;
 import io.zabrek.soulbound.listeners.ui.VisualEventFactory;
@@ -15,35 +17,51 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * This class register the listeners to Bukkit.
+ * The {@link CoreComponent} loading all listeners types.
  */
-public final class ListenerTypeRegistry {
-
-    private ListenerTypeRegistry() {
-    }
+public class ListenerTypesComponent implements CoreComponent {
 
     /**
-     * Loads the listeners.
-     *
-     * @param serviceProvider           the provider for listener services
-     * @param listenerIdentifierFactory the factory for parsing listener identifiers
-     * @param loggerFactory             the factory used to create loggers
-     * @param plugin                    the plugin instance
+     * Create a new ListenerTypesComponent.
      */
-    public static void load(final ListenerServiceProvider serviceProvider, final ListenerIdentifierFactory listenerIdentifierFactory,
-                            final SoulBoundLoggerFactory loggerFactory, final Plugin plugin) {
-        final SoulBoundLogger log = loggerFactory.create(ListenerTypeRegistry.class);
+    public ListenerTypesComponent() {}
+
+    @Override
+    public Set<Class<?>> requires() {
+        return Set.of(SoulBoundLoggerFactory.class, Plugin.class, ListenerServiceProvider.class,
+                ListenerIdentifierFactory.class);
+    }
+
+    @Override
+    public Set<Class<?>> provides() {
+        return Set.of();
+    }
+
+    @Override
+    public void load(final DependencyProvider provider) {
+        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
+        final Plugin plugin = provider.get(Plugin.class);
+        final ListenerServiceProvider listenerServiceProvider = provider.get(ListenerServiceProvider.class);
+        final ListenerIdentifierFactory listenerIdentifierFactory = provider.get(ListenerIdentifierFactory.class);
+
+        final SoulBoundLogger log = loggerFactory.create(ListenerTypesComponent.class);
 
         final Map<String, ListenerFactory> factories = new HashMap<>();
         factories.put("join", new PlayerJoinFactory());
         factories.put("death", new EntityDeathFactory());
         factories.put("ui", new VisualEventFactory(plugin));
 
+        load(listenerIdentifierFactory, listenerServiceProvider, factories, log);
+    }
+
+    private void load(final ListenerIdentifierFactory identifierFactory, final ListenerServiceProvider serviceProvider,
+                      final Map<String, ListenerFactory> factories, final SoulBoundLogger log) {
         try {
             log.info("Loading %d listener components...".formatted(factories.size()));
-            loadFactory(listenerIdentifierFactory, serviceProvider, factories);
+            loadFactory(identifierFactory, serviceProvider, factories);
         } catch (final SoulBoundException e) {
             log.error("Failed to load listeners... Error %s".formatted(e.getMessage()), e);
         }

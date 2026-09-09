@@ -9,7 +9,6 @@ import io.zabrek.soulbound.api.profile.ProfileProvider;
 import io.zabrek.soulbound.data.PlayerDataStorage;
 import io.zabrek.soulbound.id.listener.ListenerIdentifierFactory;
 import io.zabrek.soulbound.kernel.DependencyProvider;
-import io.zabrek.soulbound.listeners.ListenerTypeRegistry;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Set;
@@ -46,7 +45,6 @@ public class ListenersComponent implements CoreComponent {
                 loggerFactory, profileProvider, plugin, playerDataStorage
         );
         final ListenerIdentifierFactory listenerIdentifierFactory = new ListenerIdentifierFactory();
-        ListenerTypeRegistry.load(listenerServiceProvider, listenerIdentifierFactory, loggerFactory, plugin);
 
         provider.take(ListenerIdentifierFactory.class, listenerIdentifierFactory);
         provider.take(ListenerServiceProvider.class, listenerServiceProvider);

@@ -13,6 +13,8 @@ import io.zabrek.soulbound.kernel.components.MigratorComponent;
 import io.zabrek.soulbound.kernel.components.PlayerDataStorageComponent;
 import io.zabrek.soulbound.kernel.components.ProfileProviderComponent;
 import io.zabrek.soulbound.kernel.components.ReloaderComponent;
+import io.zabrek.soulbound.kernel.components.SoulBoundApiComponent;
+import io.zabrek.soulbound.kernel.components.types.ListenerTypesComponent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
@@ -38,10 +40,8 @@ public final class SoulBoundComponents {
      * @since 1.0.0
      */
     public static Set<CoreComponent> createDefaults(final JavaPlugin plugin) {
-        return Stream.of(
-                createEssentials(),
-                createFeatures(),
-                createAdditionalFeatures()
+        return Stream.of(createEssentials(), createDefaultFeatures(), createDefaultTypes(),
+                createAdditionalFeatures(), createIntegrationsAndAPI()
         ).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
@@ -52,9 +52,20 @@ public final class SoulBoundComponents {
                 new ConfigComponent(),
                 new AsyncSaverComponent(),
                 new DatabaseComponent(),
-                new IdentifiersComponent(),
                 new PlayerDataStorageComponent(),
                 new ListenersComponent()
+        );
+    }
+
+    private static Set<CoreComponent> createDefaultFeatures() {
+        return Set.of(
+                new IdentifiersComponent()
+        );
+    }
+
+    private static Set<CoreComponent> createIntegrationsAndAPI() {
+        return Set.of(
+                new SoulBoundApiComponent()
         );
     }
 
@@ -67,7 +78,9 @@ public final class SoulBoundComponents {
         );
     }
 
-    private static Set<CoreComponent> createFeatures() {
-        return Set.of();
+    private static Set<CoreComponent> createDefaultTypes() {
+        return Set.of(
+                new ListenerTypesComponent()
+        );
     }
 }
