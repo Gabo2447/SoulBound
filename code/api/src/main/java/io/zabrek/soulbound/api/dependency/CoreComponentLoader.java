@@ -1,33 +1,38 @@
-package io.zabrek.soulbound.api.kernel;
+package io.zabrek.soulbound.api.dependency;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * Manages and loads the core components.
+ * The core component loader essentially manages a number of {@link CoreComponent}s and loads them in the order
+ * their dependencies suggest. It detects unsolvable dependencies and throws an exception in case of any.
  *
  * @since 2.0.0
  */
 public interface CoreComponentLoader {
 
     /**
-     * Register a core component into the loading queue.
+     * Registers a new core component to be loaded in {@link #load()} later on.
+     * The registered component may not be yet loaded.
      *
-     * @param component the core component to register
+     * @param component the component to register
+     * @throws IllegalArgumentException if the component is already loaded
      * @since 2.0.0
      */
     void register(CoreComponent component);
 
     /**
-     * Initializes an initial instance into the dependency provider.
+     * Registers a new instance of a dependency that was loaded before this component loader.
+     * It will be initially injected into the components that require it before they are loaded.
      *
-     * @param clazz    the class type of the dependency
-     * @param instance the concrete instance to initialize
-     * @param <T>      the generic type of the instance
+     * @param type     the class of the dependency
+     * @param instance the instance of the dependency
+     * @param <T>      the type of the dependency
+     * @throws IllegalStateException if the dependency or a subclass of it was already injected
      * @since 2.0.0
      */
-    <T> void init(Class<T> clazz, T instance);
+    <T> void init(Class<T> type, T instance);
 
     /**
      * Get a loaded instance by its type.
@@ -65,13 +70,10 @@ public interface CoreComponentLoader {
     <T> Collection<T> getAll(Class<T> type);
 
     /**
-     * Validates dependencies and sequentially loads all registered components.
-     * <br><br>
-     * For each component, it verifies that all required dependencies are present
-     * in the provider before invoking its loading logic.
+     * Loads all registered components in the correct order as their dependencies suggest.
+     * May throw an exception in case of unsolvable dependencies causing the loading to abort.
      *
-     * @throws NoSuchElementException if a component requires a dependency that has not been provided
-     * @throws IllegalStateException  if there are circular dependencies
+     * @throws IllegalStateException in case of any errors
      * @since 2.0.0
      */
     void load();
