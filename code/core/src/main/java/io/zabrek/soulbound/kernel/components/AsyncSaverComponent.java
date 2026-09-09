@@ -14,7 +14,6 @@ import java.util.Set;
 /**
  * The implementation of {@link AbstractCoreComponent} for {@link AsyncSaver}.
  */
-@SuppressWarnings("PMD.DoNotUseThreads")
 public class AsyncSaverComponent extends AbstractCoreComponent {
 
     /**

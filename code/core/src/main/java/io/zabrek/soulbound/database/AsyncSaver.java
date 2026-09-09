@@ -1,13 +1,8 @@
 package io.zabrek.soulbound.database;
 
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
-import org.apache.logging.log4j.core.internal.annotation.SuppressFBWarnings;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;

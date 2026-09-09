@@ -1,6 +1,5 @@
 package io.zabrek.soulbound.lib.dependency;
 
-
 import io.zabrek.soulbound.api.dependency.DependencyGraphNode;
 import io.zabrek.soulbound.api.dependency.LoadedDependency;
 

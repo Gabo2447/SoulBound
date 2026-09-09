@@ -20,7 +20,6 @@ import java.util.UUID;
  *
  * @since 2.0.0
  */
-@SuppressWarnings("PMD.TooManyMethods")
 public interface SoulBoundApi {
 
     /**

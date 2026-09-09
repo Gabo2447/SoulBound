@@ -9,7 +9,6 @@ import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.api.profile.ProfileProvider;
 import io.zabrek.soulbound.api.reload.Reloader;
 import io.zabrek.soulbound.api.service.DefaultSoulBoundApiService;
-
 import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -22,7 +21,6 @@ import java.util.function.Function;
 /**
  * The implementation of {@link AbstractCoreComponent} for {@link DefaultSoulBoundApi}.
  */
-@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class SoulBoundApiComponent extends AbstractCoreComponent {
 
     /**

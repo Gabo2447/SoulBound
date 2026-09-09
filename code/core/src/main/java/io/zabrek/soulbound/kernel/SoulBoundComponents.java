@@ -15,7 +15,6 @@ import io.zabrek.soulbound.kernel.components.ProfileProviderComponent;
 import io.zabrek.soulbound.kernel.components.ReloaderComponent;
 import io.zabrek.soulbound.kernel.components.SoulBoundApiComponent;
 import io.zabrek.soulbound.kernel.components.types.ListenerTypesComponent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
 import java.util.stream.Collectors;

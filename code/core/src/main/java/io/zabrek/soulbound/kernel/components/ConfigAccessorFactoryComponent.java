@@ -13,7 +13,6 @@ import java.util.Set;
  */
 public class ConfigAccessorFactoryComponent extends AbstractCoreComponent {
 
-
     /**
      * Create a new ConfigAccessorFactoryComponent.
      */

@@ -22,6 +22,7 @@ public class ProfileProviderComponent extends AbstractCoreComponent {
     public ProfileProviderComponent() {
         super();
     }
+
     @Override
     public Set<Class<?>> requires() {
         return Set.of(Plugin.class, Server.class, ServicesManager.class);

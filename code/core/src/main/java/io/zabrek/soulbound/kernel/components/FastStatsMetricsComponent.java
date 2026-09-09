@@ -46,7 +46,7 @@ public class FastStatsMetricsComponent extends AbstractCoreComponent {
     public void load(final DependencyProvider provider) {
         final JavaPlugin plugin = getDependency(JavaPlugin.class);
 
-        final Set<FastStatsMetricsProvider> fastStatsMetricsProviders =  injectedDependencies.stream()
+        final Set<FastStatsMetricsProvider> fastStatsMetricsProviders = injectedDependencies.stream()
                 .filter(injectedDependency -> FastStatsMetricsProvider.class.isAssignableFrom(injectedDependency.type()))
                 .map(injectedDependency -> (FastStatsMetricsProvider) injectedDependency.dependency())
                 .collect(Collectors.toSet());
