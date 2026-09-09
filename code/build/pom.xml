@@ -104,7 +104,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.2</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -112,7 +111,6 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <finalName>${project.name}</finalName>
               <artifactSet>
                 <includes>
                   <include>io.zabrek.soulbound</include>
