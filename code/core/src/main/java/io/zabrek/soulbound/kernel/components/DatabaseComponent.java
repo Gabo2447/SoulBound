@@ -1,7 +1,7 @@
 package io.zabrek.soulbound.kernel.components;
 
 import io.zabrek.soulbound.api.config.ConfigAccessor;
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLogger;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.database.Connector;
@@ -10,17 +10,17 @@ import io.zabrek.soulbound.database.factory.MySqlFactory;
 import io.zabrek.soulbound.database.factory.SqliteFactory;
 import io.zabrek.soulbound.database.type.Database;
 import io.zabrek.soulbound.database.type.DatabaseType;
-import io.zabrek.soulbound.kernel.DependencyProvider;
-import org.bukkit.plugin.java.JavaPlugin;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
+import org.bukkit.plugin.Plugin;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * The implementation of {@link CoreComponent} for {@link Connector}.
+ * The implementation of {@link AbstractCoreComponent} for {@link Connector}.
  */
-public class DatabaseComponent implements CoreComponent {
+public class DatabaseComponent extends AbstractCoreComponent {
 
     /**
      * A map holding the registered database factories.
@@ -31,13 +31,15 @@ public class DatabaseComponent implements CoreComponent {
      * Create a new DatabaseComponent.
      */
     public DatabaseComponent() {
+        super();
+
         factories.put(DatabaseType.MYSQL, new MySqlFactory());
         factories.put(DatabaseType.SQLITE, new SqliteFactory());
     }
 
     @Override
     public Set<Class<?>> requires() {
-        return Set.of(JavaPlugin.class, SoulBoundLoggerFactory.class, ConfigAccessor.class);
+        return Set.of(Plugin.class, SoulBoundLoggerFactory.class, ConfigAccessor.class);
     }
 
     @Override
@@ -47,9 +49,9 @@ public class DatabaseComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
-        final ConfigAccessor config = provider.get(ConfigAccessor.class);
-        final JavaPlugin plugin = provider.get(JavaPlugin.class);
+        final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
+        final ConfigAccessor config = getDependency(ConfigAccessor.class);
+        final Plugin plugin = getDependency(Plugin.class);
 
         final SoulBoundLogger log = loggerFactory.create(DatabaseComponent.class);
 

@@ -1,17 +1,18 @@
 package io.zabrek.soulbound.kernel.components;
 
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.faststats.FastStatsMetrics;
 import io.zabrek.soulbound.faststats.FastStatsMetricsProvider;
-import io.zabrek.soulbound.kernel.DependencyProvider;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * The implementation of {@link CoreComponent} for {@link FastStatsMetrics}.
+ * The implementation of {@link AbstractCoreComponent} for {@link FastStatsMetrics}.
  */
-public class FastStatsMetricsComponent implements CoreComponent {
+public class FastStatsMetricsComponent extends AbstractCoreComponent {
 
     /**
      * The token to use for metrics publication to FastStats.
@@ -23,6 +24,7 @@ public class FastStatsMetricsComponent implements CoreComponent {
      * Create a new FastStatsMetricsComponent instance.
      */
     public FastStatsMetricsComponent() {
+        super();
     }
 
     @Override
@@ -36,10 +38,18 @@ public class FastStatsMetricsComponent implements CoreComponent {
     }
 
     @Override
-    public void load(final DependencyProvider provider) {
-        final JavaPlugin plugin = provider.get(JavaPlugin.class);
+    protected boolean requires(final Class<?> type) {
+        return FastStatsMetricsProvider.class.isAssignableFrom(type) || super.requires(type);
+    }
 
-        final Set<FastStatsMetricsProvider> fastStatsMetricsProviders = (Set<FastStatsMetricsProvider>) provider.getAll(FastStatsMetricsProvider.class);
+    @Override
+    public void load(final DependencyProvider provider) {
+        final JavaPlugin plugin = getDependency(JavaPlugin.class);
+
+        final Set<FastStatsMetricsProvider> fastStatsMetricsProviders = injectedDependencies.stream()
+                .filter(injectedDependency -> FastStatsMetricsProvider.class.isAssignableFrom(injectedDependency.type()))
+                .map(injectedDependency -> (FastStatsMetricsProvider) injectedDependency.dependency())
+                .collect(Collectors.toSet());
         final FastStatsMetrics fastStatsMetrics = new FastStatsMetrics(plugin, TOKEN, fastStatsMetricsProviders, true);
         fastStatsMetrics.enable();
 

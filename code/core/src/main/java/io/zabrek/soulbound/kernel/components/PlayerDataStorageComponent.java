@@ -1,7 +1,7 @@
 package io.zabrek.soulbound.kernel.components;
 
 import io.zabrek.soulbound.api.config.ConfigAccessor;
-import io.zabrek.soulbound.api.kernel.CoreComponent;
+import io.zabrek.soulbound.api.dependency.DependencyProvider;
 import io.zabrek.soulbound.api.logger.SoulBoundLoggerFactory;
 import io.zabrek.soulbound.api.profile.ProfileProvider;
 import io.zabrek.soulbound.api.reload.ReloadPhase;
@@ -10,19 +10,20 @@ import io.zabrek.soulbound.data.PlayerDataStorage;
 import io.zabrek.soulbound.database.Connector;
 import io.zabrek.soulbound.database.Saver;
 import io.zabrek.soulbound.database.data.PlayerDataFactory;
-import io.zabrek.soulbound.kernel.DependencyProvider;
+import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 
 import java.util.Set;
 
 /**
- * The implementation of {@link CoreComponent} for {@link PlayerDataStorage}.
+ * The implementation of {@link AbstractCoreComponent} for {@link PlayerDataStorage}.
  */
-public class PlayerDataStorageComponent implements CoreComponent {
+public class PlayerDataStorageComponent extends AbstractCoreComponent {
 
     /**
-     * Creates a new instances.
+     * Create a new PlayerDataStorageComponent.
      */
     public PlayerDataStorageComponent() {
+        super();
     }
 
     @Override
@@ -38,12 +39,12 @@ public class PlayerDataStorageComponent implements CoreComponent {
 
     @Override
     public void load(final DependencyProvider provider) {
-        final SoulBoundLoggerFactory loggerFactory = provider.get(SoulBoundLoggerFactory.class);
-        final Saver saver = provider.get(Saver.class);
-        final Connector connector = provider.get(Connector.class);
-        final ProfileProvider profileProvider = provider.get(ProfileProvider.class);
-        final ConfigAccessor config = provider.get(ConfigAccessor.class);
-        final Reloader reloader = provider.get(Reloader.class);
+        final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
+        final Saver saver = getDependency(Saver.class);
+        final Connector connector = getDependency(Connector.class);
+        final ProfileProvider profileProvider = getDependency(ProfileProvider.class);
+        final ConfigAccessor config = getDependency(ConfigAccessor.class);
+        final Reloader reloader = getDependency(Reloader.class);
 
         final PlayerDataFactory playerDataFactory = new PlayerDataFactory(loggerFactory, saver, connector, config);
         final PlayerDataStorage playerDataStorage = new PlayerDataStorage(loggerFactory.create(PlayerDataStorage.class),
