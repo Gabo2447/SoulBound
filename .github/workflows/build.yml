@@ -1,0 +1,286 @@
+name: Build
+
+on:
+  push:
+    branches: [ "*" ]
+    tags-ignore:
+      - 'v*-*'
+  pull_request:
+
+env:
+  MODULES_TO_CHECK: "api lib"
+
+jobs:
+  prepare:
+    name: Prepare Build Variables
+    runs-on: ubuntu-latest
+
+    outputs:
+      VERSION: ${{ steps.version.outputs.VERSION }}
+      VERSION_TYPE: ${{ steps.version.outputs.VERSION_TYPE }}
+      VERSION_MAVEN: ${{ steps.version.outputs.VERSION_MAVEN }}
+      VERSION_IS_NEW: ${{ steps.version.outputs.VERSION_IS_NEW }}
+      SKIP_MODULES: ${{ steps.modules.outputs.SKIP_MODULES }}
+      API_CHANGE: ${{ steps.changes.outputs.API_CHANGE }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: BetonQuest/Workflows/.github/actions/version@main
+        id: version
+        with:
+          ROOT_REPOSITORY: Gabo2447/SoulBound
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_WRAPPER_DIR: '~/.m2/wrapper'
+          SUB_MODULE: 'soulbound'
+      - name: Check module versions
+        id: changes
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          read -ra modules <<< "$MODULES_TO_CHECK"
+          API_CHANGE=False
+          for module in "${modules[@]}"; do
+            version=$(./mvnw --raw-streams help:evaluate -Dexpression=revision -q -DforceStdout --projects ":$module")
+            tag="v${version}-${module}"
+            if [ -n "$(git rev-parse -q --verify "refs/tags/$tag")" >/dev/null ] && [ "$(git rev-list -n1 "$tag")" != "$(git rev-parse HEAD)" ]; then
+              if [ ! git diff --quiet "$tag" HEAD -- "code/$module" ]; then
+                echo "Module '"$module"' has code changes compared to tag '$tag', but the version was not bumped!"
+                exit 1
+              fi
+            else
+              API_CHANGE=True            
+            fi
+          done
+
+          echo "API_CHANGE=$API_CHANGE" >> "$GITHUB_OUTPUT"
+      - name: Determine modules to skip
+        if: "steps.version.outputs.VERSION_TYPE == 'release'"
+        id: modules
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          read -ra modules <<< "$MODULES_TO_CHECK"
+          skip_modules=()
+          
+          for module in "${modules[@]}"; do
+            version=$(./mvnw --raw-streams help:evaluate -Dexpression=revision -q -DforceStdout --projects ":$module")
+            tag="v${version}-${module}"
+            if [ -n "$(git rev-parse -q --verify "refs/tags/$tag")" >/dev/null ] && [ "$(git rev-list -n1 "$tag")" != "$(git rev-parse HEAD)" ]; then
+              echo "Module '"$module"' for tag '$tag' will be skipped for deployment (tag already exists)."
+              skip_modules+=("!:$module")
+            else
+              echo "Module '"$module"' for tag '$tag' will be deployed."
+            fi
+          done
+          
+          SKIP_MODULES=$(IFS=,; echo "${skip_modules[*]}")
+          echo "SKIP_MODULES=$SKIP_MODULES" >> "$GITHUB_OUTPUT"
+
+  build_code:
+    name: Build Code
+    needs: [ prepare ]
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.VERSION }}
+      VERSION_TYPE: ${{ needs.prepare.outputs.VERSION_TYPE }}
+      VERSION_MAVEN: ${{ needs.prepare.outputs.VERSION_MAVEN }}
+      VERSION_IS_NEW: ${{ needs.prepare.outputs.VERSION_IS_NEW }}
+      SKIP_MODULES: ${{ needs.prepare.outputs.SKIP_MODULES }}
+      API_CHANGE: ${{ needs.prepare.outputs.API_CHANGE }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+      - uses: BetonQuest/Workflows/.github/actions/setup-java-maven@main
+        with:
+          JAVA_CACHE: 'maven'
+          MAVEN_BUILD_DIR: 'target/code'
+          MAVEN_WRAPPER_DIR: '~/.m2/wrapper'
+          JAVA_OVERRIDE: 25
+      - uses: BetonQuest/Workflows/.github/actions/replace-code-variables@main
+        with:
+          VERSION: ${{ env.VERSION }}
+          VERSION_TYPE: ${{ env.VERSION_TYPE }}
+          VERSION_NAMESPACE: "plugin"
+          SUB_MODULE: 'soulbound'
+      - name: Build with Maven. Phase 'verify'
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          if [ $VERSION_TYPE == 'release' ]; then CHANGELIST=-Dchangelist=; fi
+          ./mvnw ${CHANGELIST-} -P Test-All -B verify
+          mv target/code/SoulBound.jar target/code/SoulBound-${VERSION}.jar
+          git diff > target/code/CodeChanges.patch
+      - name: Upload Code
+        uses: actions/upload-artifact@v7
+        with:
+          name: SoulBound-Code
+          path: |
+            target/code/SoulBound-${VERSION}.jar
+            target/code/*/*.jar
+
+  deploy-code:
+    name: Deploy Code
+    if: "needs.prepare.outputs.VERSION_TYPE == 'release' || needs.prepare.outputs.VERSION_TYPE == 'development' && needs.prepare.outputs.VERSION_IS_NEW == 'true'"
+    needs: [ prepare, build_code ]
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.VERSION }}
+      VERSION_TYPE: ${{ needs.prepare.outputs.VERSION_TYPE }}
+      VERSION_MAVEN: ${{ needs.prepare.outputs.VERSION_MAVEN }}
+      VERSION_IS_NEW: ${{ needs.prepare.outputs.VERSION_IS_NEW }}
+      SKIP_MODULES: ${{ needs.prepare.outputs.SKIP_MODULES }}
+      API_CHANGE: ${{ needs.prepare.outputs.API_CHANGE }}
+
+    outputs:
+      UPLOAD_PATH: ${{ steps.save_upload_path.outputs.upload_path }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+      - uses: BetonQuest/Workflows/.github/actions/setup-java-maven@main
+        with:
+          JAVA_CACHE: 'maven'
+          JAVA_REPOSITORY_ID: 'soulbound'
+          JAVA_REPOSITORY_USER: MAVEN_SERVER_USERNAME
+          JAVA_REPOSITORY_PASS: MAVEN_SERVER_PASSWORD
+          MAVEN_BUILD_DIR: 'target/code'
+          MAVEN_WRAPPER_DIR: '~/.m2/wrapper'
+          JAVA_OVERRIDE: 25
+      - name: Load patch file
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          git apply target/code/CodeChanges.patch
+          rm target/code/CodeChanges.patch
+      - name: Publish to Maven Repository
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          if [ $VERSION_TYPE == 'release' ]; then CHANGELIST=-Dchangelist=; fi
+          if [ -n "$SKIP_MODULES" ]; then PROJECTS="--projects $SKIP_MODULES"; fi
+          ./mvnw ${CHANGELIST-} -P Skip-Verification,Test-None -B ${PROJECTS-} deploy | tee maven-deploy.log
+        env:
+          REPOSITORY_URL: ${{ vars.REPOSITORY_URL }}
+          MAVEN_SERVER_USERNAME: ${{ secrets.MAVEN_SERVER_USERNAME }}
+          MAVEN_SERVER_PASSWORD: ${{ secrets.MAVEN_SERVER_PASSWORD }}
+      - name: Get upload URL from deploy log
+        id: save_upload_path
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          UPLOAD_PATH="$(grep -oP "(?<=Uploading to soulbound: $REPOSITORY_URL)io/zabrek/soulbound/.*/soulbound-.*-shaded.jar" maven-deploy.log)"
+          echo "upload_path=$UPLOAD_PATH" >> "$GITHUB_OUTPUT"
+        env:
+          REPOSITORY_URL: ${{ vars.REPOSITORY_URL }}
+
+  create-release:
+    name: Create GitHub Release
+    if: "needs.prepare.outputs.VERSION_TYPE == 'release'"
+    needs: [ prepare, build_code, deploy-code ]
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.VERSION }}
+      VERSION_TYPE: ${{ needs.prepare.outputs.VERSION_TYPE }}
+      VERSION_MAVEN: ${{ needs.prepare.outputs.VERSION_MAVEN }}
+      VERSION_IS_NEW: ${{ needs.prepare.outputs.VERSION_IS_NEW }}
+      SKIP_MODULES: ${{ needs.prepare.outputs.SKIP_MODULES }}
+      API_CHANGE: ${{ needs.prepare.outputs.API_CHANGE }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+      - uses: BetonQuest/Workflows/.github/actions/setup-java-maven/cache@main
+        with:
+          MAVEN_BUILD_DIR: 'target/code'
+      - name: Set CHANGELOG.md version
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          sed -i "s~## \[Unreleased\]~## \[${VERSION}\]~g" ./CHANGELOG.md
+          DATE="$(date +%Y-%m-%d)"
+          sed -i "s~\${maven\.build\.timestamp}~$DATE~g" ./CHANGELOG.md
+      - name: Create release
+        uses: docker://antonyurchenko/git-release:v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAFT_RELEASE: false
+          PRE_RELEASE: false
+          CHANGELOG_FILE: CHANGELOG.md
+          RELEASE_NAME: SoulBound ${{ env.VERSION }}
+        with:
+          args: |
+            target/code/SoulBound-${{ env.VERSION }}.jar
+
+  publish-prepare:
+    name: Publish Prepare
+    if: "always() && !cancelled() && ( needs.prepare.outputs.VERSION_TYPE == 'release' || needs.prepare.outputs.VERSION_TYPE == 'development' && needs.prepare.outputs.VERSION_IS_NEW == 'true' )"
+    needs: [ prepare, build_code, deploy-code, create-release ]
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.VERSION }}
+      VERSION_TYPE: ${{ needs.prepare.outputs.VERSION_TYPE }}
+      VERSION_MAVEN: ${{ needs.prepare.outputs.VERSION_MAVEN }}
+      VERSION_IS_NEW: ${{ needs.prepare.outputs.VERSION_IS_NEW }}
+      SKIP_MODULES: ${{ needs.prepare.outputs.SKIP_MODULES }}
+      API_CHANGE: ${{ needs.prepare.outputs.API_CHANGE }}
+
+    outputs:
+      PLUGIN_API_VERSION: ${{ steps.api_version.outputs.PLUGIN_API_VERSION }}
+      COMMIT_DESCRIPTION: ${{ steps.commit_description.outputs.COMMIT_DESCRIPTION }}
+      RELEASE_DESCRIPTION: ${{ steps.release_description.outputs.RELEASE_DESCRIPTION }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+      - uses: BetonQuest/Workflows/.github/actions/setup-java-maven/cache@main
+        with:
+          MAVEN_BUILD_DIR: 'target/code'
+      - name: Prepare API version
+        shell: bash --noprofile --norc -euo pipefail {0}
+        id: api_version
+        run: |
+          PLUGIN_API_VERSION="$(./mvnw --raw-streams help:evaluate -Dexpression=plugin.api-version -DforceStdout -q --projects :soulbound)"
+          echo "PLUGIN_API_VERSION=$PLUGIN_API_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Set Commit Description
+        id: commit_description
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          COMMIT_SUBJECT="$(git log -1 "$GITHUB_SHA" --pretty="%s")"
+          COMMIT_MESSAGE="$(git log -1 "$GITHUB_SHA" --pretty="%b")"
+          COMMIT_URL="https://github.com/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+          COMMIT_DESCRIPTION="[__**${COMMIT_SUBJECT}**__](${COMMIT_URL})"
+          if [[ -n "$COMMIT_MESSAGE" ]]; then
+            COMMIT_DESCRIPTION="$COMMIT_DESCRIPTION"$'\n\n'"$COMMIT_MESSAGE"
+          fi
+          {
+            echo 'COMMIT_DESCRIPTION<<EOF'
+            printf '%s\n' "$COMMIT_DESCRIPTION"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - name: Get release
+        uses: cardinalby/git-get-release-action@v1
+        id: get_release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag: 'v${{ env.VERSION }}'
+          doNotFailIfNotFound: true
+      - name: Set release description
+        id: release_description
+        shell: bash --noprofile --norc -euo pipefail {0}
+        run: |
+          RELEASE_BODY="$RELEASE_BODY"
+          if [[ -n "$RELEASE_BODY" ]]; then
+            RELEASE_DESCRIPTION="$RELEASE_BODY"
+          else
+            RELEASE_DESCRIPTION="$COMMIT_DESCRIPTION"
+          fi
+          {
+            echo 'RELEASE_DESCRIPTION<<EOF'
+            printf '%s\n' "$RELEASE_DESCRIPTION"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+        env:
+          RELEASE_BODY: ${{ steps.get_release.outputs.body }}
+          COMMIT_DESCRIPTION: ${{ steps.commit_description.outputs.COMMIT_DESCRIPTION }}
