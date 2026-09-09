@@ -22,6 +22,6 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2026.2
         with:
-          args: --volume,${{ github.workspace }}/.mvn:/root/.m2
+          args: --volume,/home/runner/work/SoulBound-Java/SoulBound/.mvn:/root/.m2
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
