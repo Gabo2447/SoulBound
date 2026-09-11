@@ -2,6 +2,7 @@ package io.zabrek.soulbound.listeners.ui;
 
 import io.zabrek.soulbound.api.SoulBoundException;
 import io.zabrek.soulbound.api.bukkit.event.PlayerLevelChangeEvent;
+import io.zabrek.soulbound.api.bukkit.event.PlayerVisualEffectEvent;
 import io.zabrek.soulbound.api.listeners.Listener;
 import io.zabrek.soulbound.api.listeners.ListenerFactory;
 import io.zabrek.soulbound.api.listeners.service.ListenerService;
@@ -32,6 +33,10 @@ public class VisualEventFactory implements ListenerFactory {
         service.request(PlayerLevelChangeEvent.class)
                 .handler(event::onLevelChange)
                 .profile(PlayerLevelChangeEvent::getProfile)
+                .subscribe(true);
+        service.request(PlayerVisualEffectEvent.class)
+                .handler(event::applyParticleEffect)
+                .profile(PlayerVisualEffectEvent::getProfile)
                 .subscribe(true);
         return event;
     }

@@ -12,6 +12,7 @@ import io.zabrek.soulbound.id.listener.ListenerIdentifierFactory;
 import io.zabrek.soulbound.lib.dependency.component.AbstractCoreComponent;
 import io.zabrek.soulbound.listeners.death.EntityDeathFactory;
 import io.zabrek.soulbound.listeners.join.PlayerJoinFactory;
+import io.zabrek.soulbound.listeners.seismic_impact.SeismicImpactFactory;
 import io.zabrek.soulbound.listeners.ui.VisualEventFactory;
 import org.bukkit.plugin.Plugin;
 
@@ -47,8 +48,9 @@ public class ListenerTypesComponent extends AbstractCoreComponent {
         final SoulBoundLogger log = loggerFactory.create(ListenerTypesComponent.class);
 
         final Map<String, ListenerFactory> factories = new HashMap<>();
-        factories.put("join", new PlayerJoinFactory());
         factories.put("death", new EntityDeathFactory());
+        factories.put("join", new PlayerJoinFactory());
+        factories.put("seismic", new SeismicImpactFactory());
         factories.put("ui", new VisualEventFactory(plugin));
 
         load(listenerIdentifierFactory, listenerServiceProvider, factories, log);
