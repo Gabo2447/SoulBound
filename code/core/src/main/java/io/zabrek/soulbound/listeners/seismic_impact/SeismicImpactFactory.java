@@ -20,6 +20,7 @@ public class SeismicImpactFactory implements ListenerFactory {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public Listener create(final ListenerService service) throws SoulBoundException {
         final SeismicImpact listener = new SeismicImpact(service);
         service.request(EntityDamageEvent.class)
