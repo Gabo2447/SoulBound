@@ -46,7 +46,8 @@ public class DefaultProfileProvider implements ProfileProvider {
 
             @Override
             public String getProfileName() {
-                return offlinePlayer.getName();
+                final String name = offlinePlayer.getName();
+                return name != null ? name : offlinePlayer.getUniqueId().toString();
             }
 
             @Override

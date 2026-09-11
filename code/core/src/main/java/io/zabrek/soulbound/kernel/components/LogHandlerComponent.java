@@ -54,7 +54,7 @@ public class LogHandlerComponent extends AbstractCoreComponent {
         provider.take(HistoryHandler.class, debugHistoryHandler);
     }
 
-    @SuppressWarnings("PMD.DoNotUseThreads")
+    @SuppressWarnings({"PMD.DoNotUseThreads", "UnstableApiUsage"})
     private void registerLogHandler(final Server server, final Handler handler) {
         final Logger serverLogger = server.getLogger().getParent();
         serverLogger.addHandler(handler);

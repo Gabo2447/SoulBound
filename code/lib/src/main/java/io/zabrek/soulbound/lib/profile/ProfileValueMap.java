@@ -99,11 +99,9 @@ public class ProfileValueMap<K> implements Map<K, Profile> {
 
     @Override
     public void putAll(final Map<? extends K, ? extends Profile> map) {
-        this.map.putAll(map.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Entry::getKey,
-                        entry -> entry.getValue() == null ? null : entry.getValue().getProfileUUID()
-                )));
+        for (final Map.Entry<? extends K, ? extends Profile> entry : map.entrySet()) {
+            this.put(entry.getKey(), entry.getValue());
+        }
     }
 
     @Override

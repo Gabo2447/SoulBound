@@ -1,6 +1,7 @@
 package io.zabrek.soulbound;
 
 import com.zaxxer.hikari.pool.HikariPool;
+import io.papermc.paper.plugin.configuration.PluginMeta;
 import io.zabrek.soulbound.api.config.ConfigAccessor;
 import io.zabrek.soulbound.api.config.FileConfigAccessor;
 import io.zabrek.soulbound.api.dependency.CoreComponentLoader;
@@ -16,7 +17,6 @@ import io.zabrek.soulbound.lib.dependency.component.DefaultCoreComponentLoader;
 import io.zabrek.soulbound.lib.logger.CachingSoulBoundLoggerFactory;
 import io.zabrek.soulbound.logger.DefaultSoulBoundLoggerFactory;
 import org.bukkit.Server;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -103,12 +103,13 @@ public class SoulBound extends JavaPlugin {
         log.info("SoulBound has been disabled.");
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void initPluginDependencies(final CoreComponentLoader loader) {
         loader.init(JavaPlugin.class, this);
         loader.init(Server.class, getServer());
         loader.init(PluginManager.class, getServer().getPluginManager());
         loader.init(BukkitScheduler.class, getServer().getScheduler());
-        loader.init(PluginDescriptionFile.class, getDescription());
+        loader.init(PluginMeta.class, getPluginMeta());
         loader.init(ServicesManager.class, getServer().getServicesManager());
     }
 
