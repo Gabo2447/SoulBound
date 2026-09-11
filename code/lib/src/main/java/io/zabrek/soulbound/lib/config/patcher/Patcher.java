@@ -15,7 +15,6 @@ import io.zabrek.soulbound.lib.version.VersionParser;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -120,7 +119,7 @@ public class Patcher {
         }
     }
 
-    private void collectVersion(final String currentKey, @NotNull final List<Map<?, ?>> mapList) throws InvalidConfigurationException {
+    private void collectVersion(final String currentKey, final List<Map<?, ?>> mapList) throws InvalidConfigurationException {
         final Matcher matcher = VERSION_PATTERN.matcher(currentKey);
         if (!matcher.matches()) {
             throw new InvalidConfigurationException("The patch file at '" + currentKey + "' has an invalid version format.");

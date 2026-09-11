@@ -41,6 +41,7 @@ public class SoulBoundApiComponent extends AbstractCoreComponent {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public void load(final DependencyProvider provider) {
         final ServicesManager servicesManager = getDependency(ServicesManager.class);
         final SoulBoundLoggerFactory loggerFactory = getDependency(SoulBoundLoggerFactory.class);
@@ -51,7 +52,7 @@ public class SoulBoundApiComponent extends AbstractCoreComponent {
         final SoulBoundLogger serviceLogger = loggerFactory.create(SoulBoundApiService.class);
         final Function<Plugin, SoulBoundApi> defaultSoulBoundApiGenerator = callerPlugin -> {
             serviceLogger.debug("Loading API for plugin %s version %s".formatted(callerPlugin.getName(),
-                    callerPlugin.getDescription().getVersion()));
+                    callerPlugin.getPluginMeta().getVersion()));
             final BukkitManager bukkitManager = new DefaultBukkitManager(callerPlugin);
             return new DefaultSoulBoundApi(callerPlugin, profileProvider, loggerFactory, reloader, bukkitManager);
         };

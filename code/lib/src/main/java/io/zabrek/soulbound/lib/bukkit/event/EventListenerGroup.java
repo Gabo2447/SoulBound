@@ -87,7 +87,7 @@ public interface EventListenerGroup<T extends Event> {
      * @return a new {@link ProxyListener} for the given event class and priority
      * @throws SoulBoundException if an error occurs while creating the listener
      */
-    @Contract(value = "!null, !null, !null -> new", pure = true)
+    @Contract("_, _, _ -> new")
     ProxyListener<T> createListener(Plugin plugin, Class<T> eventClass, EventPriority priority) throws SoulBoundException;
 
     /**
